@@ -1,0 +1,16 @@
+# 1. Buat seluruh folder dan file api untuk semua modul
+# 2. menyisipkan file .gitkeep di semua sub-folder yang masih kosong agar tim Anda bisa langsung melihat strukturnya di GitHub/GitLab:
+
+mkdir -p app/Modules/{Core,Admission,Academic,Student,Teacher,Learning,Exam,Finance,Auth,Notification,Attendance,ELibrary,Canteen}/{Controllers,Requests,Resources,Models,Actions,Providers} && find app/Modules -type d -exec touch {}/.gitkeep \; && touch app/Modules/{Core,Admission,Academic,Student,Teacher,Learning,Exam,Finance,Auth,Notification,Attendance,ELibrary,Canteen}/api.php
+
+# 3. setup composer.json untuk bikin namespace lebih ringkas, cari bagian autoload psr-4
+
+"autoload": {
+    "psr-4": {
+        "App\\": "app/",
+        "Database\\Factories\\": "database/factories/",
+        "Database\\Seeders\\": "database/seeders/",
+        "Modules\\": "app/Modules/" <--- TAMBAHKAN BARIS INI
+    }
+}
+
