@@ -37,7 +37,7 @@ app/Modules/NamaModul/
 ---
 
 ## 🗺️ Peta Modul LMS
-
+```text
 app/Modules/
 ├── 📁 Core/           # Master Data Statis: Jenjang, Tahun Ajaran, Semester, & Master Mapel (Kunci Utama Sistem)
 ├── 📁 Admission/      # PPDB: Landing page pendaftaran, formulir calon siswa, upload berkas, seleksi, & kelulusan pendaftaran
