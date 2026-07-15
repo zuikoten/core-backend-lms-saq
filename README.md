@@ -1,58 +1,58 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏛️ Arsitektur Backend: Modular Domain-Driven Design (DDD)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Dokumen ini menjelaskan standar arsitektur backend berbasis API yang digunakan dalam proyek LMS ini. Kita menggunakan pendekatan **Modular Laravel dengan Prinsip DDD Ringan** untuk memastikan kode tetap rapi, mudah dirawat, dan minim konflik seiring berkembangnya aplikasi.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🎯 Mengapa Memilih Arsitektur Ini?
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+LMS ini memiliki banyak domain bisnis yang kompleks (Siswa, Akademik, Keuangan, Ujian, dll). Arsitektur ini dipilih karena memberikan keuntungan praktis langsung bagi tim:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. **Zero Merge Conflict (Kerja Tim Maksimal)**
+   Aplikasi dibagi menjadi "mini-aplikasi" mandiri di dalam folder `app/Modules/`. Developer bisa bekerja di modul berbeda secara bersamaan tanpa takut merusak atau menimpa kode satu sama lain saat _push_ ke Git.
+2. **Satu Class, Satu Fitur (Action-Based)**
+   Logika bisnis tidak ditumpuk di Controller atau satu file Service yang panjang. Kita menggunakan **Action Class**. Jika ada _bug_ di fitur pembuatan jadwal, Anda cukup membuka file `CreateClassScheduleAction.php`.
+3. **Batas Data yang Tegas (Clean Boundaries)**
+   Modul besar seperti `Academic` menggabungkan Kelas dan Mapel agar performa query cepat. Sementara aktor utama seperti `Student` dan `Teacher` dipisah agar otonom dan datanya tidak bisa diacak-ngacak oleh modul lain (seperti Kantin atau Perpustakaan).
+4. **Siap Scale-Up (Future Proof)**
+   Karena setiap modul terisolasi dengan baik berbasis API, jika di masa depan modul tertentu (misal: Ujian) harus dipisah menjadi _Microservice_ tersendiri karena trafik tinggi, kita bisa memotong folder tersebut dengan sangat mudah.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 📂 Struktur Folder Standard Modul
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Setiap modul di dalam `app/Modules/` wajib mengikuti struktur anatomi berikut:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```text
+app/Modules/NamaModul/
+├── 📁 Controllers/     # Menerima request API HTTP & mengembalikan JSON Resource
+├── 📁 Requests/        # Validasi input API (Form Request)
+├── 📁 Resources/       # Format output JSON (Mencegah kebocoran struktur tabel asli)
+├── 📁 Models/          # Eloquent Model khusus internal modul ini
+├── 📁 Actions/         # JANTUNG DDD (Tempat logika bisnis murni berada. 1 Class = 1 Fitur)
+├── 📁 Providers/       # Mendaftarkan route api.php otomatis ke framework
+└── 📄 api.php          # Definisi endpoint API khusus modul ini
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## 🗺️ Peta Modul LMS
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+app/Modules/
+├── 📁 Core/ # Master Data Statis: Jenjang, Tahun Ajaran, Semester, & Master Mapel (Kunci Utama Sistem)
+├── 📁 Admission/ # PPDB: Landing page pendaftaran, formulir calon siswa, upload berkas, seleksi, & kelulusan pendaftaran
+├── 📁 Academic/ # Manajemen Dinamis: Data Kelas, Rombel/Class Groups, Plotting Siswa ke Kelas, & kompilasi Raport akhir
+├── 📁 Student/ # Data Aktor: Khusus mengelola profil detail Siswa & Orang Tua/Wali, Catatan Kedisiplinan/BK, & Rekam Medis UKS
+├── 📁 Teacher/ # Data Aktor: Khusus mengelola profil detail Guru, NIP, & Berkas Kompetensi (Otonom)
+├── 📁 Learning/ # Aktivitas Harian: Jadwal Pelajaran harian, Materi Belajar, & Tugas/Assignment biasa
+├── 📁 Exam/ # Fitur Kompleks: Bank Soal & Sistem Ujian Interaktif (Konsep mirip Google Form / Quizizz)
+├── 📁 Finance/ # Finansial: Pembayaran SPP, Tabungan, & Saldo Digital Siswa
+├── 📁 Auth/ # Keamanan: Sistem Login, Register, serta Manajemen Role & Permission (Spatie)
+├── 📁 Notification/ # Sentralisasi: Broadcast notifikasi otomatis via WhatsApp / Email (e.g., Tagihan SPP)
+├── 📁 Attendance/ # Presensi & Absensi: Mencatat kehadiran siswa/guru harian, izin, sakit, terintegrasi ke rapor
+├── 📁 ELibrary/ # Perpustakaan Digital: Manajemen buku fisik (peminjaman) & e-book pendukung materi ajar
+└── 📁 Canteen/ # Kantin Digital: Manajemen merchant/stan kantin, menu makanan, dan transaksi cashless siswa
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+💡 _Pegang teguh prinsip ini: Controller hanya menerima input dan memberikan respon JSON. Logika bisnis wajib berada di dalam folder `Actions/`._
