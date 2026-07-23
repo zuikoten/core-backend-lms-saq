@@ -39,7 +39,11 @@ return [
 
     'guards' => [
         'web' => [
-            'driver' => 'session',
+            'driver' => 'session',  // login berbasis session/cookie (buat Blade admin)
+            'provider' => 'users',
+        ],
+        'sanctum' => [
+            'driver' => 'sanctum',   // login berbasis token (buat API React orang tua)
             'provider' => 'users',
         ],
     ],
@@ -64,7 +68,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => Modules\Auth\Models\User::class,
+            'model' => App\Models\User::class,
         ],
 
         // 'users' => [

@@ -1,0 +1,328 @@
+================================================================
+RANGKUMAN PEKERJAAN — SISTEM KEUANGAN SPP TK (MODUL FINANCE)
+================================================================
+Terakhir diperbarui: 23 Juli 2026
+
+----------------------------------------------------------------
+1. KONTEKS PROYEK
+----------------------------------------------------------------
+- Sistem LMS untuk sekolah TK, tahap awal fokus ke modul Finance
+  agar sekolah bisa langsung menerima pembayaran SPP.
+- Arsitektur: Laravel 12, Modular Domain-Driven Design (DDD ringan)
+  di folder app/Modules/, dengan prinsip 1 Class = 1 Fitur (Action).
+- Instalasi tunggal per sekolah (bukan SaaS/multi-tenant).
+- Parent-facing app: Vite React (via API + Sanctum).
+- Admin panel: Blade views (session-based auth).
+- Namespace modul dikustomisasi lewat composer.json:
+    "Modules\\": "app/Modules/"
+  (menggantikan default App\Modules\...)
+- Payment gateway yang sedang dipelajari/dipertimbangkan: Finpay
+  (untuk QRIS, Virtual Account, transfer bank). Belum final,
+  desain skema terkait ini masih tentatif.
+
+----------------------------------------------------------------
+2. STRUKTUR TABEL TERBARU (11 tabel inti + 3 tabel gateway opsional)
+----------------------------------------------------------------
+
+## MODUL AUTH
+
+Tabel: users (shared kernel, model di App\Models, BUKAN di dalam
+module Auth — dipakai lintas banyak modul untuk audit/akses)
+  - id
+  - email (nullable, unique)      -> wajib diisi untuk admin
+  - phone_number (unique)         -> dipakai orang tua untuk login
+  - password
+  - is_active (boolean, default true)
+  - remember_token
+  - timestamps
+
+Tabel: otp_codes
+  - id
+  - user_id (FK users, nullable, cascadeOnDelete)
+  - phone_number (nullable)       -> diisi khusus saat action_type=activation
+  - otp_code
+  - action_type (enum: login, activation, reset_password)
+  - expires_at
+  - is_used (boolean, default false)
+  - timestamps
+  - index (user_id, created_at)
+  - index (phone_number, created_at)
+  Catatan: action_type "activation" dipakai saat orang tua
+  pertama kali aktivasi akun (user_id masih NULL, dicocokkan
+  lewat phone_number ke tabel parents).
+
+## MODUL CORE
+
+Tabel: academic_years
+  - id
+  - year_name (contoh: "2026/2027")
+  - is_active (boolean, default false)
+  - timestamps
+
+## MODUL STUDENT
+
+Tabel: parents
+  - id
+  - user_id (FK users, nullable, unique, nullOnDelete)
+  - phone_number             -> acuan pencocokan saat aktivasi akun
+  - father_name (nullable)
+  - mother_name (nullable)
+  - address (nullable)
+  - timestamps
+  Catatan: satu keluarga = satu baris parents. Kakak-adik dari
+  keluarga yang sama pakai parent_id yang sama (SOP staff saat
+  input siswa kedua/ketiga dari keluarga yang sama).
+
+Tabel: students
+  - id
+  - parent_id (FK parents, restrictOnDelete)
+  - nisn (nullable, unique)   -> anak TK sering belum punya NISN
+  - full_name
+  - nickname (nullable)
+  - gender (enum: L, P)
+  - birth_date
+  - status (enum: aktif, mutasi, lulus — default aktif)
+  - timestamps
+
+## MODUL FINANCE
+
+Tabel: billing_types
+  - id
+  - name (SPP, Tabungan Wajib, Study Tour, Uang Buku, dll.)
+  - is_recurring (boolean, default false)
+  - timestamps
+
+Tabel: billing_tariffs (rename dari spp_tariffs, digeneralisasi)
+  - id
+  - billing_type_id (FK billing_types, restrictOnDelete)
+  - academic_year_id (FK academic_years, restrictOnDelete)
+  - tariff_name
+  - amount (decimal 12,2)
+  - timestamps
+
+Tabel: student_tariff_mappings (rename dari student_spp_mappings)
+  - id
+  - student_id (FK students, restrictOnDelete)
+  - billing_tariff_id (FK billing_tariffs, restrictOnDelete)
+  - academic_year_id (FK academic_years, restrictOnDelete) [denormalisasi]
+  - billing_type_id (FK billing_types, restrictOnDelete) [denormalisasi]
+  - timestamps
+  - UNIQUE (student_id, academic_year_id, billing_type_id)
+    -> cegah siswa punya 2 tarif SPP aktif sekaligus di tahun
+       ajaran yang sama, tapi tetap boleh beda billing_type.
+
+Tabel: invoices
+  - id
+  - student_id (FK students, restrictOnDelete)
+  - academic_year_id (FK academic_years, restrictOnDelete)
+  - created_by (FK users, nullable, nullOnDelete) -> NULL = digenerate sistem
+  - invoice_number (unique)
+  - period_month (1-12)
+  - period_year
+  - due_date (date, nullable)
+  - total_amount (decimal 12,2, default 0)
+  - status (enum: unpaid, partial, paid, cancelled — default unpaid)
+  - timestamps
+  - UNIQUE (student_id, academic_year_id, period_month)
+    -> cegah invoice dobel untuk siswa yang sama di bulan yang sama.
+
+Tabel: invoice_items
+  - id
+  - invoice_id (FK invoices, cascadeOnDelete)
+  - billing_type_id (FK billing_types, restrictOnDelete)
+  - item_name (snapshot nama saat invoice dibuat)
+  - amount (decimal 12,2)
+  - timestamps
+
+Tabel: payment_channels
+  - id
+  - channel_type (enum: bank_transfer, virtual_account, qris, e_wallet, cash)
+  - name (BCA, Mandiri, OVO, Cash di Sekolah, dll.)
+  - account_number (nullable)
+  - account_holder_name (nullable)
+  - is_active (boolean, default true)
+  - provider (default "manual"; atau "finpay")
+  - provider_channel_code (nullable) -> kode kanal versi provider (mis. vabca)
+  - timestamps
+
+Tabel: invoice_payments (rename dari spp_payments)
+  - id
+  - invoice_id (FK invoices, restrictOnDelete)
+  - payment_channel_id (FK payment_channels, restrictOnDelete)
+  - payment_gateway_transaction_id (FK payment_gateway_transactions,
+    nullable, restrictOnDelete) -> NULL kalau bayar cash
+  - reference_number (nullable) -> No. struk / transaction ID
+  - amount_paid (decimal 12,2)
+  - paid_at (datetime)
+  - handover_by (FK users, nullable, nullOnDelete) -> admin penerima cash
+  - timestamps
+  Catatan: satu invoice bisa punya banyak baris di sini (cicilan/
+  partial payment). Status invoice PAID tercapai saat SUM(amount_paid)
+  menyamai total_amount invoice.
+
+## TABEL GATEWAY (opsional, terkait rencana integrasi Finpay — TENTATIF)
+
+Tabel: payment_gateway_transactions
+  - id
+  - invoice_id (FK invoices, restrictOnDelete)
+  - payment_channel_id (FK payment_channels, nullable, restrictOnDelete)
+  - gateway_reference_id (unique) -> referensi yang kita generate & kirim
+  - gateway_trx_id (nullable) -> ID/kode dari provider (VA number, dll.)
+  - channel_data (json, nullable) -> data spesifik per kanal
+    (VA number, QR string, redirect URL, dll.)
+  - status (enum: pending, paid, expired, failed, cancelled)
+  - amount (decimal 12,2)
+  - expired_at (nullable)
+  - paid_at (nullable)
+  - raw_request (json, nullable)
+  - raw_response (json, nullable)
+  - timestamps
+  - index (invoice_id, status)
+
+Tabel: webhook_logs
+  - id
+  - provider (default "finpay")
+  - payload (json)
+  - headers (json, nullable)
+  - signature_valid (boolean, default false)
+  - processed (boolean, default false)
+  - payment_gateway_transaction_id (FK, nullable, nullOnDelete)
+  - created_at (tanpa updated_at)
+
+----------------------------------------------------------------
+3. URUTAN MIGRATION (sesuai dependency FK)
+----------------------------------------------------------------
+Tahap 1 (independen):
+  1. create_auth_users_table
+  2. create_core_academic_years_table
+  3. create_finance_billing_types_table
+  4. create_finance_payment_channels_table
+
+Tahap 2:
+  5. create_auth_otp_codes_table          (FK: users)
+  6. create_student_parents_table         (FK: users)
+  7. create_finance_billing_tariffs_table (FK: billing_types, academic_years)
+
+Tahap 3:
+  8. create_student_students_table        (FK: parents)
+
+Tahap 4:
+  9.  create_finance_student_tariff_mappings_table
+      (FK: students, billing_tariffs, academic_years, billing_types)
+  10. create_finance_invoices_table       (FK: students, academic_years, users)
+
+Tahap 5:
+  11. create_finance_invoice_items_table  (FK: invoices, billing_types)
+  12. create_finance_payment_gateway_transactions_table
+      (FK: invoices, payment_channels) [tentatif/Finpay]
+  13. create_finance_invoice_payments_table
+      (FK: invoices, payment_channels, payment_gateway_transactions, users)
+
+Tahap 6 (tentatif/Finpay):
+  14. create_finance_webhook_logs_table (FK: payment_gateway_transactions)
+
+Tambahan (Spatie, dipublish belakangan):
+  - create_permission_tables (roles, permissions, model_has_roles, dll.)
+  - alter users: tambah remember_token
+
+----------------------------------------------------------------
+4. KEPUTUSAN DESAIN PENTING YANG SUDAH DISEPAKATI
+----------------------------------------------------------------
+- Role/permission: 100% pakai Spatie Permission, tidak ada kolom
+  "role" eksplisit di tabel users.
+- Model User tetap di App\Models (shared kernel), BUKAN dipindah
+  ke dalam module Auth — karena di-FK oleh banyak modul tak
+  berkaitan (Finance, Student, Auth sendiri).
+- Partial payment (cicilan) DIIZINKAN: satu invoice, banyak baris
+  invoice_payments, status invoice UNPAID -> PARTIAL -> PAID.
+  remaining_balance dihitung on-the-fly, tidak disimpan sebagai
+  kolom fisik.
+- Alur aktivasi akun orang tua: data siswa & orang tua diinput
+  DULUAN oleh staff sekolah (baris parents dibuat dengan user_id
+  NULL). Orang tua aktivasi lewat OTP ke phone_number yang sudah
+  terdaftar — mencegah orang random klaim jadi orang tua siswa.
+- Penamaan tabel digeneralisasi supaya fleksibel dan tidak
+  sempit maknanya:
+    spp_tariffs           -> billing_tariffs
+    student_spp_mappings  -> student_tariff_mappings
+    spp_payments          -> invoice_payments
+- Tabungan & Study Tour nominalnya bebas/berubah-ubah per event,
+  cukup diinput manual di invoice_items.amount (tidak perlu master
+  tarif untuk billing_type yang is_recurring = false).
+- onDelete policy: tabel transaksi finansial (invoices,
+  invoice_items, invoice_payments) pakai RESTRICT; kolom metadata
+  "siapa yang melakukan" (created_by, handover_by) pakai
+  nullOnDelete.
+- Sandbox Finpay = lingkungan testing developer, BUKAN interface
+  produksi untuk orang tua. Untuk VA/QRIS kemungkinan pakai pola
+  Core API (tampilan dibuat sendiri di app), bukan Hosted Payment
+  (redirect ke halaman Finpay) — masih perlu dikonfirmasi ke tim
+  Finpay.
+
+----------------------------------------------------------------
+5. YANG SUDAH DIKERJAKAN (KODE)
+----------------------------------------------------------------
+- Migration untuk seluruh tabel di atas (tahap 1-5, tentatif
+  tahap 6 untuk Finpay).
+- Model: AcademicYear (Modul Core), BillingType, PaymentChannel
+  (Modul Finance) — sudah dibuatkan, lengkap relasi HasMany.
+  CATATAN: model BillingTariff, Invoice, InvoiceItem,
+  InvoicePayment, PaymentGatewayTransaction BELUM dibuat —
+  relasi yang mengarah ke sana akan error sampai model-model
+  itu dibuat.
+- Model User: ditambah trait HasRoles (Spatie).
+- Seeder: RoleSeeder, AcademicYearSeeder, BillingTypeSeeder,
+  PaymentChannelSeeder, AdminUserSeeder — urutan panggil di
+  DatabaseSeeder: Role -> AcademicYear -> BillingType ->
+  PaymentChannel -> AdminUser.
+  CATATAN: namespace di seeder yang lama masih pakai placeholder
+  App\Modules\..., perlu diupdate ke Modules\... (final).
+- Modul Auth (BARU SEBAGIAN, BELUM DIIMPLEMENTASI SEPENUHNYA
+  oleh user — masih dikerjakan bertahap):
+    - Models/OtpCode (rencana, belum dibuat)
+    - Controllers/AuthController (showLoginForm, login, logout)
+    - Requests/LoginRequest
+    - Actions/AuthenticateAdminAction (cek is_active, cek
+      hasRole('admin'), baru Auth::attempt)
+    - Providers/AuthModuleServiceProvider (load web.php dengan
+      middleware 'web')
+    - web.php (route: login, login.attempt, admin.dashboard,
+      admin.logout — dengan middleware role:admin)
+    - View Blade sederhana: login.blade.php, dashboard.blade.php
+    - Middleware Spatie sudah didaftarkan di bootstrap/app.php
+      (alias: role, permission, role_or_permission)
+- routes/web.php root: route "/" diubah dari welcome page jadi
+  redirect ke route('login').
+- Sudah dikonfirmasi via `php artisan route:list` bahwa semua
+  route modul Auth (login, login.attempt, admin.dashboard,
+  admin.logout) sudah terdaftar dengan benar memakai namespace
+  Modules\Auth\...
+
+----------------------------------------------------------------
+6. YANG BELUM DIKERJAKAN / LANGKAH SELANJUTNYA
+----------------------------------------------------------------
+- Implementasi penuh kode modul Auth di atas oleh user (baru
+  rencana/contoh kode, belum ditulis ke project sebenarnya).
+- Model: BillingTariff, StudentTariffMapping, Invoice,
+  InvoiceItem, InvoicePayment, PaymentGatewayTransaction,
+  WebhookLog, Parent, Student.
+- Migration remember_token untuk users (alter table).
+- Update namespace di seeder lama (App\Modules -> Modules).
+- API Auth untuk orang tua (React + Sanctum): request-otp,
+  verify-otp, login, logout — beda guard dari admin (session
+  vs token).
+- Action: GenerateOtpAction, VerifyOtpAction,
+  ActivateParentAccountAction (paling kompleks — menyambungkan
+  OTP -> users -> parents dalam satu alur), ResetPasswordWithOtpAction.
+- Notification: SendOtpWhatsappNotification (integrasi WhatsApp
+  Gateway, provider belum ditentukan — kandidat: Fonnte, Watzhap).
+- Finalisasi integrasi Finpay (menunggu akses sandbox & dokumentasi
+  Postman Collection dari tim onboarding Finpay) — termasuk
+  konfirmasi pola integrasi (Core API vs Hosted Payment vs
+  Finpay Link) dan skema signature verification untuk webhook.
+- Middleware EnsureUserIsActive (auto-logout admin yang
+  dinonaktifkan di tengah sesi aktif) — belum dibuat.
+
+================================================================
+END OF FILE
+================================================================
