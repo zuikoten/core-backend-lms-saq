@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             AcademicYearSeeder::class,
             BillingTypeSeeder::class,
             PaymentChannelSeeder::class,
+            BillingTariffSeeder::class,
             AdminUserSeeder::class,   // wajib setelah RoleSeeder
         ]);
     }
