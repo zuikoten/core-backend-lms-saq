@@ -26,13 +26,13 @@
 
             <a href="{{ $builtRoutes['dashboard'] }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition
-                      {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                      {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-100 text-indigo-600' : 'text-slate-600 hover:bg-slate-200' }}">
                 <i class="ti ti-layout-dashboard text-[18px]"></i>
                 Dashboard
             </a>
 
             <a href="#"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-200 transition">
                 <i class="ti ti-clipboard-list text-[18px]"></i>
                 PPDB
             </a>
@@ -41,7 +41,7 @@
         {{-- AKADEMIK --}}
         <div>
             <button @click="openGroup = openGroup === 'akademik' ? null : 'akademik'"
-                class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+                class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-200 transition">
                 <span class="flex items-center gap-3">
                     <i class="ti ti-books text-[18px]"></i>
                     Akademik
@@ -51,25 +51,25 @@
             </button>
             <div x-show="openGroup === 'akademik'" x-transition class="pl-11 pr-3 space-y-1 mt-1">
                 <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700">Kelas
+                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-200 hover:text-slate-700">Kelas
                     & Rombel</a>
                 <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700">Jadwal
+                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-200 hover:text-slate-700">Jadwal
                     Pelajaran</a>
                 <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700">Materi</a>
+                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-200 hover:text-slate-700">Materi</a>
                 <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700">Presensi</a>
+                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-200 hover:text-slate-700">Presensi</a>
                 <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700">Penilaian
+                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-200 hover:text-slate-700">Penilaian
                     / Ujian</a>
                 <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700">Rapor</a>
+                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-200 hover:text-slate-700">Rapor</a>
             </div>
         </div>
 
         <a href="#"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-200 transition">
             <i class="ti ti-users text-[18px]"></i>
             Siswa & Guru
         </a>
@@ -77,7 +77,7 @@
         {{-- KEUANGAN --}}
         <div>
             <button @click="openGroup = openGroup === 'keuangan' ? null : 'keuangan'"
-                class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+                class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-200 transition">
                 <span class="flex items-center gap-3">
                     <i class="ti ti-cash text-[18px]"></i>
                     Keuangan
@@ -87,24 +87,24 @@
             </button>
             <div x-show="openGroup === 'keuangan'" x-transition class="pl-11 pr-3 space-y-1 mt-1">
                 <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700">Tarif
+                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-200 hover:text-slate-700">Tarif
                     & Tagihan</a>
                 <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700">Pembayaran</a>
+                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-200 hover:text-slate-700">Pembayaran</a>
                 <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700">Laporan
+                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-200 hover:text-slate-700">Laporan
                     Keuangan</a>
             </div>
         </div>
 
         <a href="#"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-200 transition">
             <i class="ti ti-book-2 text-[18px]"></i>
             Perpustakaan
         </a>
 
         <a href="#"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-200 transition">
             <i class="ti ti-tools-kitchen-2 text-[18px]"></i>
             Kantin
         </a>
@@ -114,17 +114,17 @@
             <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Lainnya</p>
 
             <a href="#"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-200 transition">
                 <i class="ti ti-database text-[18px]"></i>
                 Data Master
             </a>
             <a href="#"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-200 transition">
                 <i class="ti ti-bell text-[18px]"></i>
                 Notifikasi
             </a>
             <a href="#"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-200 transition">
                 <i class="ti ti-settings text-[18px]"></i>
                 Pengaturan
             </a>
@@ -136,17 +136,22 @@
         <form method="POST" action="{{ route('admin.logout') }}">
             @csrf
             <button type="submit"
-                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition text-left">
+                class="group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-200 hover:bg-red-200 transition duration-200 text-left">
+                <!-- Lingkaran Inisial -->
                 <div
-                    class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-semibold">
+                    class="w-9 h-9 rounded-full bg-indigo-200 text-indigo-600 group-hover:bg-red-300 group-hover:text-red-700 flex items-center justify-center text-sm font-semibold transition">
                     {{ strtoupper(substr(auth()->user()->email, 0, 1)) }}
                 </div>
+                <!-- Teks Email & Role -->
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-slate-700 truncate">{{ auth()->user()->email }}</p>
-                    <p class="text-xs text-slate-400">Admin</p>
+                    <p class="text-sm font-medium text-slate-700 group-hover:text-red-700 truncate transition">
+                        {{ auth()->user()->email }}</p>
+                    <p class="text-xs text-slate-400 group-hover:text-red-500 transition">Admin</p>
                 </div>
-                <i class="ti ti-logout text-slate-400 text-[16px]"></i>
+                <!-- Ikon Logout -->
+                <i class="ti ti-logout text-slate-400 group-hover:text-red-600 text-[16px] transition"></i>
             </button>
         </form>
     </div>
+
 </aside>
