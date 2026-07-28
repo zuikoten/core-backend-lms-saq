@@ -34,9 +34,18 @@ app/Modules/NamaModul/
 └── 📄 api.php          # Definisi endpoint API khusus modul ini
 ```
 
+💡 **Catatan:** Struktur di atas adalah folder _wajib minimum_ yang harus ada di setiap modul. Modul tertentu boleh menambahkan folder lain sesuai kebutuhan spesifiknya, selama tetap mengikuti prinsip Action-based (logika bisnis tetap di `Actions/`). Contoh:
+
+- `Middleware/` — kalau modul butuh guard/filter khusus (mis. modul Auth punya `EnsureUserIsActive`)
+- `Notifications/` — kalau modul mengirim notifikasi sendiri (mis. modul Auth punya notifikasi OTP WhatsApp)
+- `Jobs/`, `Events/`, `Listeners/` — kalau modul punya proses async/event-driven
+
+Folder tambahan ini tidak mengubah aturan dasar: Controller tetap hanya menerima input & mengembalikan respons, logika bisnis tetap di `Actions/`.
+
 ---
 
 ## 🗺️ Peta Modul LMS
+
 ```text
 app/Modules/
 ├── 📁 Core/           # Master Data Statis: Jenjang, Tahun Ajaran, Semester, & Master Mapel (Kunci Utama Sistem)
@@ -56,3 +65,4 @@ app/Modules/
 ---
 
 💡 _Pegang teguh prinsip ini: Controller hanya menerima input dan memberikan respon JSON. Logika bisnis wajib berada di dalam folder `Actions/`._
+```

@@ -2,34 +2,52 @@
 
 namespace Modules\Auth\Actions;
 
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
 class AuthenticateAdminAction
 {
-    public function execute(string $email, string $password, bool $remember = false): User
+    private const MAX_ATTEMPTS = 5;
+
+    private const DECAY_SECONDS = 60;
+
+    public function execute(string $email, string $password, bool $remember = false): void
     {
-        $user = User::where('email', $email)->first();
+        $throttleKey = 'login-admin:'.strtolower($email);
 
-        if (! $user || ! $user->is_active) {
+        if (RateLimiter::tooManyAttempts($throttleKey, self::MAX_ATTEMPTS)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
             throw ValidationException::withMessages([
-                'email' => 'Akun tidak ditemukan atau sudah dinonaktifkan.',
+                'email' => "Terlalu banyak percobaan login. Coba lagi dalam {$seconds} detik.",
             ]);
         }
 
-        if (! $user->hasRole('admin')) {
-            throw ValidationException::withMessages([
-                'email' => 'Akun ini tidak memiliki akses admin.',
-            ]);
-        }
+        $user = \App\Models\User::query()->where('email', $email)->first();
 
-        if (! Auth::attempt(['email' => $email, 'password' => $password], $remember)) {
+        if (! $user || ! $user->hasRole('superadmin')) {
+            RateLimiter::hit($throttleKey, self::DECAY_SECONDS);
+
             throw ValidationException::withMessages([
                 'email' => 'Email atau password salah.',
             ]);
         }
 
-        return $user;
+        if (! $user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda tidak aktif, hubungi pemilik sistem.',
+            ]);
+        }
+
+        if (! Auth::guard('web')->attempt(['email' => $email, 'password' => $password], $remember)) {
+            RateLimiter::hit($throttleKey, self::DECAY_SECONDS);
+
+            throw ValidationException::withMessages([
+                'email' => 'Email atau password salah.',
+            ]);
+        }
+
+        RateLimiter::clear($throttleKey);
     }
 }

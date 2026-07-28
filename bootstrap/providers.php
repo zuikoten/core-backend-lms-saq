@@ -6,4 +6,5 @@ return [
     AppServiceProvider::class,
     // Daftarkan provider modul di sini:
     Modules\Auth\Providers\AuthModuleServiceProvider::class,
+    Modules\Auth\Providers\AuthRateLimiterServiceProvider::class,
 ];
