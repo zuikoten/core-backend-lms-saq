@@ -3,6 +3,7 @@
 namespace Modules\Auth\Providers;
 
 use Illuminate\Notifications\ChannelManager;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Auth\Notifications\Channels\LogWhatsappGateway;
@@ -20,8 +21,23 @@ class AuthModuleServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->registerGates();
         $this->registerWhatsappNotificationChannel();
         $this->registerRoutes();
+    }
+
+    /**
+     * superadmin di-bypass total dari SEMUA pengecekan can()/@can — tidak
+     * perlu di-assign permission apa pun secara eksplisit, termasuk
+     * permission yang belum dibuat sekalipun. Role lain (guru, kepala
+     * sekolah, bendahara, dst) tetap butuh permission eksplisit (mis.
+     * "panel.access" untuk sekadar bisa login ke panel ini).
+     */
+    private function registerGates(): void
+    {
+        Gate::before(function ($user, string $ability) {
+            return $user->hasRole('superadmin') ? true : null;
+        });
     }
 
     private function registerWhatsappNotificationChannel(): void

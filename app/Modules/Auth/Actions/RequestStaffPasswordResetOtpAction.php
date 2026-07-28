@@ -1,0 +1,31 @@
+<?php
+
+namespace Modules\Auth\Actions;
+
+use App\Models\User;
+use Illuminate\Validation\ValidationException;
+
+class RequestStaffPasswordResetOtpAction
+{
+    public function __construct(private readonly GenerateOtpAction $generateOtpAction)
+    {
+    }
+
+    /**
+     * @param  string  $phoneNumber  Sudah dinormalisasi ke format 62xxxxxxxxxx oleh FormRequest
+     */
+    public function execute(string $phoneNumber): User
+    {
+        $user = User::query()->where('phone_number', $phoneNumber)->first();
+
+        if (! $user || ! $user->can('panel.access')) {
+            throw ValidationException::withMessages([
+                'phone_number' => 'Nomor HP tidak ditemukan atau bukan akun yang berwenang.',
+            ]);
+        }
+
+        $this->generateOtpAction->execute('reset_password', $phoneNumber, $user);
+
+        return $user;
+    }
+}

@@ -10,14 +10,14 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use Modules\Auth\Actions\RequestAdminPasswordResetOtpAction;
+use Modules\Auth\Actions\RequestStaffPasswordResetOtpAction;
 use Modules\Auth\Actions\ResetPasswordWithOtpAction;
-use Modules\Auth\Requests\AdminForgotPasswordRequest;
-use Modules\Auth\Requests\AdminRequestOtpRequest;
-use Modules\Auth\Requests\AdminResetPasswordRequest;
-use Modules\Auth\Requests\AdminVerifyOtpRequest;
+use Modules\Auth\Requests\StaffForgotPasswordRequest;
+use Modules\Auth\Requests\StaffRequestOtpRequest;
+use Modules\Auth\Requests\StaffResetPasswordRequest;
+use Modules\Auth\Requests\StaffVerifyOtpRequest;
 
-class AdminPasswordResetController extends Controller
+class StaffPasswordResetController extends Controller
 {
     /**
      * Halaman pilihan: reset via email atau via OTP WhatsApp.
@@ -36,7 +36,7 @@ class AdminPasswordResetController extends Controller
         return view('modules.auth.forgot-password-email');
     }
 
-    public function sendResetLinkEmail(AdminForgotPasswordRequest $request): RedirectResponse
+    public function sendResetLinkEmail(StaffForgotPasswordRequest $request): RedirectResponse
     {
         $status = Password::broker()->sendResetLink(
             $request->only('email'),
@@ -55,7 +55,7 @@ class AdminPasswordResetController extends Controller
         ]);
     }
 
-    public function reset(AdminResetPasswordRequest $request): RedirectResponse
+    public function reset(StaffResetPasswordRequest $request): RedirectResponse
     {
         $status = Password::broker()->reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
@@ -76,7 +76,7 @@ class AdminPasswordResetController extends Controller
 
     // ---------------------------------------------------------------
     // Jalur 2: OTP WhatsApp (alternatif, pakai infrastruktur otp_codes
-    // yang sama dengan parent — lihat RequestAdminPasswordResetOtpAction
+    // yang sama dengan parent — lihat RequestStaffPasswordResetOtpAction
     // & ResetPasswordWithOtpAction)
     // ---------------------------------------------------------------
 
@@ -85,7 +85,7 @@ class AdminPasswordResetController extends Controller
         return view('modules.auth.forgot-password-otp');
     }
 
-    public function requestOtp(AdminRequestOtpRequest $request, RequestAdminPasswordResetOtpAction $action): RedirectResponse
+    public function requestOtp(StaffRequestOtpRequest $request, RequestStaffPasswordResetOtpAction $action): RedirectResponse
     {
         $user = $action->execute($request->validated('phone_number'));
 
@@ -100,7 +100,7 @@ class AdminPasswordResetController extends Controller
         ]);
     }
 
-    public function resetWithOtp(AdminVerifyOtpRequest $request, ResetPasswordWithOtpAction $action): RedirectResponse
+    public function resetWithOtp(StaffVerifyOtpRequest $request, ResetPasswordWithOtpAction $action): RedirectResponse
     {
         $action->execute(
             $request->validated('phone_number'),

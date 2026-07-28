@@ -12,10 +12,10 @@
 </head>
 <body class="bg-slate-50 antialiased" style="font-family: 'Plus Jakarta Sans', sans-serif;">
     <div class="flex min-h-screen">
-        <x-admin-sidebar />
+        <x-staff-sidebar />
 
         <div class="flex-1 flex flex-col min-w-0">
-            <x-admin-navbar :title="trim($__env->yieldContent('title', 'Dashboard'))" />
+            <x-staff-navbar :title="trim($__env->yieldContent('title', 'Dashboard'))" />
 
             <main class="p-6">
                 @yield('content')

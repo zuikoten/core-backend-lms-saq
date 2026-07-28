@@ -11,45 +11,45 @@
 </head>
 <body style="font-family: 'Plus Jakarta Sans', sans-serif;">
 <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-    <div class="w-full max-w-sm">
+    <div class="w-full max-w-md">
         <div class="bg-white rounded-2xl p-8" style="box-shadow: 0 2px 10px rgba(20,20,50,0.06);">
             <div class="flex flex-col items-center mb-6">
-                <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center mb-4">
-                    <i class="ti ti-lock-question text-amber-600 text-2xl"></i>
+                <div class="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center mb-4">
+                    <i class="ti ti-lock-question text-indigo-600 text-2xl"></i>
                 </div>
                 <h1 class="text-lg font-semibold text-slate-800">Lupa Password</h1>
-                <p class="text-sm text-slate-500 mt-1 text-center">Masukkan email admin, kami kirim tautan reset.</p>
+                <p class="text-sm text-slate-500 mt-1 text-center">Pilih cara reset password kamu.</p>
             </div>
 
-            @if (session('status'))
-                <div class="mb-4 rounded-2xl bg-green-50 border border-green-100 px-4 py-3 text-sm text-green-600">
-                    {{ session('status') }}
-                </div>
-            @endif
-
-            @if ($errors->any())
-                <div class="mb-4 rounded-2xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
-                    {{ $errors->first() }}
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('password.email') }}" class="space-y-4">
-                @csrf
-                <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Email</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required autofocus
-                        class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                <button type="submit"
-                    class="w-full rounded-xl bg-indigo-600 text-white py-2.5 text-sm font-medium hover:bg-indigo-700 transition">
-                    Kirim Tautan Reset
-                </button>
-
-                <a href="{{ route('login') }}" class="block text-center text-sm text-slate-500 hover:underline">
-                    Kembali ke login
+            <div class="space-y-3">
+                <a href="{{ route('password.request.email') }}"
+                   class="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 hover:border-indigo-300 hover:bg-indigo-50/40 transition">
+                    <div class="w-9 h-9 rounded-[10px] bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <i class="ti ti-mail text-[18px]"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-slate-800">Lewat Email</p>
+                        <p class="text-xs text-slate-500">Tautan reset dikirim ke email akun kamu</p>
+                    </div>
+                    <i class="ti ti-chevron-right text-slate-400"></i>
                 </a>
-            </form>
+
+                <a href="{{ route('password.request.otp') }}"
+                   class="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 hover:border-indigo-300 hover:bg-indigo-50/40 transition">
+                    <div class="w-9 h-9 rounded-[10px] bg-green-50 text-green-600 flex items-center justify-center">
+                        <i class="ti ti-brand-whatsapp text-[18px]"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-slate-800">Lewat OTP WhatsApp</p>
+                        <p class="text-xs text-slate-500">Kode OTP dikirim ke nomor HP terdaftar</p>
+                    </div>
+                    <i class="ti ti-chevron-right text-slate-400"></i>
+                </a>
+            </div>
+
+            <a href="{{ route('login') }}" class="block text-center text-sm text-slate-500 hover:underline mt-6">
+                Kembali ke login
+            </a>
         </div>
     </div>
 </div>

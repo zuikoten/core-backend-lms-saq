@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Modules\Auth\Actions\AuthenticateAdminAction;
+use Modules\Auth\Actions\AuthenticateStaffAction;
 use Modules\Auth\Requests\LoginRequest;
 
 class AuthController extends Controller
@@ -16,7 +16,7 @@ class AuthController extends Controller
         return view('modules.auth.login');
     }
 
-    public function login(LoginRequest $request, AuthenticateAdminAction $action): RedirectResponse
+    public function login(LoginRequest $request, AuthenticateStaffAction $action): RedirectResponse
     {
         // ValidationException dari Action otomatis ditangkap Laravel dan
         // dikembalikan ke view login sebagai $errors — sesuai perilaku
@@ -29,7 +29,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin.dashboard'));
+        return redirect()->intended(route('staff.dashboard'));
     }
 
     public function logout(Request $request): RedirectResponse
