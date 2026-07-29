@@ -36,17 +36,31 @@
                         class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Password Baru</label>
-                    <input type="password" name="password" required
-                        class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
+                <!-- Password Input dengan toggle show/hide password -->
+                    <div x-data="{ show: false }" class="relative">
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Password Baru</label>
+                        <div class="relative">
+                            <input :type="show ? 'text' : 'password'" name="password" required
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 pr-11 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <button type="button" @click="show = !show"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600">
+                                <i class="ti" :class="show ? 'ti-eye-off' : 'ti-eye'"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Konfirmasi Password</label>
-                    <input type="password" name="password_confirmation" required
-                        class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
+                <!-- Konfirmasi Password Input dengan toggle show/hide password -->
+                    <div x-data="{ show: false }" class="relative">
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Konfirmasi Password</label>
+                        <div class="relative">
+                            <input :type="show ? 'text' : 'password'" name="password_confirmation" required
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 pr-11 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <button type="button" @click="show = !show"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600">
+                                <i class="ti" :class="show ? 'ti-eye-off' : 'ti-eye'"></i>
+                            </button>
+                        </div>
+                    </div>
 
                 <button type="submit"
                     class="w-full rounded-xl bg-indigo-600 text-white py-2.5 text-sm font-medium hover:bg-indigo-700 transition">
