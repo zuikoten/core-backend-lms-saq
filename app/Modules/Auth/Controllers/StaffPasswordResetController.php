@@ -11,17 +11,24 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Auth\Actions\RequestStaffPasswordResetOtpAction;
-use Modules\Auth\Actions\ResetPasswordWithOtpAction;
+use Modules\Auth\Actions\SetPasswordAfterOtpVerificationAction;
+use Modules\Auth\Actions\VerifyOtpAction;
 use Modules\Auth\Requests\StaffForgotPasswordRequest;
 use Modules\Auth\Requests\StaffRequestOtpRequest;
 use Modules\Auth\Requests\StaffResetPasswordRequest;
+use Modules\Auth\Requests\StaffSetNewPasswordRequest;
 use Modules\Auth\Requests\StaffVerifyOtpRequest;
 
 class StaffPasswordResetController extends Controller
 {
     /**
-     * Halaman pilihan: reset via email atau via OTP WhatsApp.
+     * Kunci session yang menandai nomor HP mana yang OTP-nya baru saja
+     * berhasil diverifikasi — dipakai sebagai "tiket" masuk ke step
+     * set password baru, supaya orang tidak bisa langsung buka halaman
+     * itu tanpa lewat verifikasi OTP dulu.
      */
+    private const OTP_VERIFIED_SESSION_KEY = 'staff_reset_otp_verified_phone';
+
     public function showChooseForm(): View
     {
         return view('modules.auth.forgot-password');
@@ -75,9 +82,9 @@ class StaffPasswordResetController extends Controller
     }
 
     // ---------------------------------------------------------------
-    // Jalur 2: OTP WhatsApp (alternatif, pakai infrastruktur otp_codes
-    // yang sama dengan parent — lihat RequestStaffPasswordResetOtpAction
-    // & ResetPasswordWithOtpAction)
+    // Jalur 2: OTP WhatsApp — dipecah 3 step: minta OTP -> verifikasi
+    // OTP -> set password baru. Beda dari parent (API), yang verifikasi
+    // OTP + set password digabung satu request lewat ResetPasswordWithOtpAction.
     // ---------------------------------------------------------------
 
     public function showOtpRequestForm(): View
@@ -100,14 +107,53 @@ class StaffPasswordResetController extends Controller
         ]);
     }
 
-    public function resetWithOtp(StaffVerifyOtpRequest $request, ResetPasswordWithOtpAction $action): RedirectResponse
+    public function verifyOtp(StaffVerifyOtpRequest $request, VerifyOtpAction $action): RedirectResponse
     {
-        $action->execute(
-            $request->validated('phone_number'),
-            $request->validated('otp_code'),
-            $request->validated('password'),
-        );
+        $phoneNumber = $request->validated('phone_number');
+
+        $user = \App\Models\User::query()->where('phone_number', $phoneNumber)->first();
+
+        if (! $user) {
+            return back()->withErrors(['otp_code' => 'Akun tidak ditemukan.']);
+        }
+
+        $action->execute('reset_password', $request->validated('otp_code'), user: $user);
+
+        session([self::OTP_VERIFIED_SESSION_KEY => $phoneNumber]);
+
+        return redirect()->route('password.otp.new-password.form', ['phone_number' => $phoneNumber]);
+    }
+
+    public function showNewPasswordForm(Request $request): View|RedirectResponse
+    {
+        $phoneNumber = $request->query('phone_number');
+
+        if (! $this->otpWasVerifiedFor($phoneNumber)) {
+            return redirect()->route('password.request.otp')
+                ->withErrors(['phone_number' => 'Sesi verifikasi sudah tidak berlaku, silakan ulangi dari awal.']);
+        }
+
+        return view('modules.auth.reset-password-new', ['phoneNumber' => $phoneNumber]);
+    }
+
+    public function setNewPassword(StaffSetNewPasswordRequest $request, SetPasswordAfterOtpVerificationAction $action): RedirectResponse
+    {
+        $phoneNumber = $request->validated('phone_number');
+
+        if (! $this->otpWasVerifiedFor($phoneNumber)) {
+            return redirect()->route('password.request.otp')
+                ->withErrors(['phone_number' => 'Sesi verifikasi sudah tidak berlaku, silakan ulangi dari awal.']);
+        }
+
+        $action->execute($phoneNumber, $request->validated('password'));
+
+        session()->forget(self::OTP_VERIFIED_SESSION_KEY);
 
         return redirect()->route('login')->with('status', 'Password berhasil direset, silakan login.');
+    }
+
+    private function otpWasVerifiedFor(?string $phoneNumber): bool
+    {
+        return $phoneNumber && session(self::OTP_VERIFIED_SESSION_KEY) === $phoneNumber;
     }
 }

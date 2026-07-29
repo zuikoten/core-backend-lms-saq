@@ -15,13 +15,28 @@
 <body style="font-family: 'Plus Jakarta Sans', sans-serif;">
     <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
         <div class="w-full max-w-sm">
-            <div class="bg-white rounded-2xl p-8" style="box-shadow: 0 2px 10px rgba(20,20,50,0.06);">
+            <div class="bg-white rounded-2xl p-8" style="box-shadow: 0 2px 10px rgba(20,20,50,0.06);"
+                x-data="{ method: 'password' }">
                 <div class="flex flex-col items-center mb-6">
                     <div class="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center mb-4">
                         <i class="ti ti-school text-indigo-600 text-2xl"></i>
                     </div>
-                    <h1 class="text-lg font-semibold text-slate-800">Masuk ke Panel</h1>
+                    <h1 class="text-lg font-semibold text-slate-800">Masuk ke Panel Sekolah</h1>
                     <p class="text-sm text-slate-500 mt-1">SAQ Learning Management System</p>
+                </div>
+
+                {{-- Tab switcher --}}
+                <div class="flex rounded-xl bg-slate-100 p-1 mb-5 text-sm font-medium">
+                    <button type="button" @click="method = 'password'"
+                        :class="method === 'password' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500'"
+                        class="flex-1 rounded-lg py-1.5 transition">
+                        Email & Password
+                    </button>
+                    <button type="button" @click="method = 'otp'"
+                        :class="method === 'otp' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500'"
+                        class="flex-1 rounded-lg py-1.5 transition">
+                        OTP WhatsApp
+                    </button>
                 </div>
 
                 @if ($errors->any())
@@ -30,14 +45,17 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('login.attempt') }}" class="space-y-4">
+                {{-- Form: Email & Password --}}
+                <form x-show="method === 'password'" x-cloak method="POST" action="{{ route('login.attempt') }}"
+                    class="space-y-4">
                     @csrf
-                    <!-- Email Input -->
+
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">Email</label>
-                        <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                        <input type="email" name="email" value="{{ old('email') }}"
                             class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
+
                     <!-- Password Input dengan toggle show/hide password -->
                     <div x-data="{ show: false }" class="relative">
                         <label class="block text-sm font-medium text-slate-600 mb-1">Password</label>
@@ -50,7 +68,7 @@
                             </button>
                         </div>
                     </div>
-                    <!-- Remember Me dan Forgot Password -->
+
                     <div class="flex items-center justify-between text-sm">
                         <label class="flex items-center gap-2 text-slate-500">
                             <input type="checkbox" name="remember" class="rounded border-slate-300">
@@ -59,10 +77,27 @@
                         <a href="{{ route('password.request') }}" class="text-indigo-600 hover:underline">Lupa
                             password?</a>
                     </div>
-                    <!-- Submit Button -->
+
                     <button type="submit"
                         class="w-full rounded-xl bg-indigo-600 text-white py-2.5 text-sm font-medium hover:bg-indigo-700 transition">
                         Masuk
+                    </button>
+                </form>
+
+                {{-- Form: OTP WhatsApp --}}
+                <form x-show="method === 'otp'" x-cloak method="POST" action="{{ route('login.otp.request') }}"
+                    class="space-y-4">
+                    @csrf
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Nomor HP</label>
+                        <input type="tel" name="phone_number" placeholder="08xxxxxxxxxx"
+                            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+
+                    <button type="submit"
+                        class="w-full rounded-xl bg-indigo-600 text-white py-2.5 text-sm font-medium hover:bg-indigo-700 transition">
+                        Kirim Kode OTP
                     </button>
                 </form>
             </div>

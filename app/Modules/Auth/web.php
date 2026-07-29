@@ -10,6 +10,16 @@ Route::post('login', [AuthController::class, 'login'])
     ->name('login.attempt');
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
+// Login via OTP WhatsApp (alternatif dari email+password)
+Route::post('login/otp/request', [AuthController::class, 'requestLoginOtp'])
+    ->middleware('throttle:otp-request')
+    ->name('login.otp.request');
+Route::get('login/otp/verify', [AuthController::class, 'showLoginOtpVerifyForm'])
+    ->name('login.otp.verify.form');
+Route::post('login/otp/verify', [AuthController::class, 'loginWithOtp'])
+    ->middleware('throttle:login')
+    ->name('login.otp.verify');
+
 // Halaman pilihan: reset via email atau via OTP WhatsApp
 Route::get('forgot-password', [StaffPasswordResetController::class, 'showChooseForm'])
     ->name('password.request');
@@ -33,9 +43,15 @@ Route::post('forgot-password/otp', [StaffPasswordResetController::class, 'reques
     ->name('password.otp.request');
 Route::get('forgot-password/otp/verify', [StaffPasswordResetController::class, 'showOtpVerifyForm'])
     ->name('password.otp.verify.form');
-Route::post('forgot-password/otp/verify', [StaffPasswordResetController::class, 'resetWithOtp'])
+Route::post('forgot-password/otp/verify', [StaffPasswordResetController::class, 'verifyOtp'])
     ->middleware('throttle:login')
     ->name('password.otp.verify');
+
+Route::get('forgot-password/otp/new-password', [StaffPasswordResetController::class, 'showNewPasswordForm'])
+    ->name('password.otp.new-password.form');
+Route::post('forgot-password/otp/new-password', [StaffPasswordResetController::class, 'setNewPassword'])
+    ->middleware('throttle:login')
+    ->name('password.otp.new-password');
 
 // permission:panel.access -> siapa pun boleh masuk panel selama di-assign
 // permission ini (superadmin otomatis lolos lewat Gate::before bypass,

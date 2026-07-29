@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Verifikasi OTP — SPP TK</title>
+    <title>Verifikasi OTP Login — SPP TK</title>
     @vite(['resources/css/app.css', 'resources/js/modules/auth/otp-input.js', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,7 +33,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('password.otp.verify') }}" class="space-y-5" x-data="otpInput()" @paste.prevent="handlePaste($event)">
+            <form method="POST" action="{{ route('login.otp.verify') }}" class="space-y-5" x-data="otpInput()" @paste.prevent="handlePaste($event)">
                 @csrf
                 <input type="hidden" name="phone_number" value="{{ old('phone_number', $phoneNumber) }}">
                 <input type="hidden" name="otp_code" :value="digits.join('')">
@@ -55,11 +55,11 @@
 
                 <button type="submit"
                     class="w-full rounded-xl bg-indigo-600 text-white py-2.5 text-sm font-medium hover:bg-indigo-700 transition">
-                    Verifikasi Kode
+                    Masuk
                 </button>
 
-                <a href="{{ route('password.request.otp') }}" class="block text-center text-sm text-slate-500 hover:underline">
-                    Belum dapat kode? Kirim ulang
+                <a href="{{ route('login') }}" class="block text-center text-sm text-slate-500 hover:underline">
+                    &larr; Kembali ke login
                 </a>
             </form>
         </div>

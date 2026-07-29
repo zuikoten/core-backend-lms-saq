@@ -4,7 +4,7 @@ namespace Modules\Auth\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StaffVerifyOtpRequest extends FormRequest
+class StaffSetNewPasswordRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -15,7 +15,7 @@ class StaffVerifyOtpRequest extends FormRequest
     {
         return [
             'phone_number' => ['required', 'string'],
-            'otp_code' => ['required', 'digits:6'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }
 }
