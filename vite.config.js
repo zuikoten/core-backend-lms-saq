@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, searchForWorkspaceRoot } from "vite";
 import laravel from "laravel-vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { globSync } from "glob";
@@ -17,4 +17,10 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    // Tambahkan konfigurasi server untuk mengizinkan akses ke folder proyek saat ini
+    server: {
+        fs: {
+            strict: false,
+        },
+    },
 });
