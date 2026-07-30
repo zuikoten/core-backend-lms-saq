@@ -47,8 +47,11 @@ class VerifyOtpAction
             // Matikan paksa biar tidak terus dicoba walau belum expired.
             $otp->update(['is_used' => true]);
 
+            // Kunci error SENGAJA beda dari 'otp_code' — supaya view bisa
+            // membedakan kasus ini secara eksplisit (mis. untuk trigger
+            // auto-redirect), bukan menebak dari isi teks pesannya.
             throw ValidationException::withMessages([
-                'otp_code' => 'Terlalu banyak percobaan salah. Minta kode OTP baru.',
+                'too_many_attempts' => 'Terlalu banyak percobaan salah. Minta kode OTP baru.',
             ]);
         }
 

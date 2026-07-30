@@ -27,10 +27,22 @@
                 </div>
             @endif
 
+            @php
+                $tooManyAttempts = $errors->has('too_many_attempts');
+            @endphp
+
             @if ($errors->any())
                 <div class="mb-4 rounded-2xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
                     {{ $errors->first() }}
                 </div>
+            @endif
+
+            @if ($tooManyAttempts)
+                <p class="text-center text-xs text-slate-400 mb-4"
+                   x-data="{ seconds: 5 }"
+                   x-init="setInterval(() => { if (seconds > 0) { seconds--; } else { window.location.href = '{{ route('login') }}'; } }, 1000)">
+                    Mengalihkan ke halaman login dalam <span x-text="seconds"></span> detik...
+                </p>
             @endif
 
             <form method="POST" action="{{ route('login.otp.verify') }}" class="space-y-5" x-data="otpInput()" @paste.prevent="handlePaste($event)">
