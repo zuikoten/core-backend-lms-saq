@@ -8,6 +8,8 @@ use Modules\Auth\Models\OtpCode;
 
 class VerifyOtpAction
 {
+    private const MAX_ATTEMPTS = 3;
+
     /**
      * @param  string  $actionType  'activation' | 'login' | 'reset_password'
      * @param  string  $otpCode
@@ -41,7 +43,18 @@ class VerifyOtpAction
             ]);
         }
 
+        if ($otp->attempts >= self::MAX_ATTEMPTS) {
+            // Matikan paksa biar tidak terus dicoba walau belum expired.
+            $otp->update(['is_used' => true]);
+
+            throw ValidationException::withMessages([
+                'otp_code' => 'Terlalu banyak percobaan salah. Minta kode OTP baru.',
+            ]);
+        }
+
         if (! hash_equals((string) $otp->otp_code, $otpCode)) {
+            $otp->increment('attempts');
+
             throw ValidationException::withMessages([
                 'otp_code' => 'Kode OTP salah.',
             ]);

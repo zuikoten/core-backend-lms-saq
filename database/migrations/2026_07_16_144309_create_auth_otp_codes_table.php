@@ -19,6 +19,7 @@ return new class extends Migration
             $table->enum('action_type', ['login', 'activation', 'reset_password']);
             $table->timestamp('expires_at');
             $table->boolean('is_used')->default(false);
+            $table->unsignedTinyInteger('attempts')->default(0);
             $table->timestamps();
 
             $table->index(['user_id', 'created_at']);
