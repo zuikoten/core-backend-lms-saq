@@ -71,7 +71,7 @@
 
                     <div class="flex items-center justify-between text-sm">
                         <label class="flex items-center gap-2 text-slate-500">
-                            <input type="checkbox" name="remember" class="rounded border-slate-300">
+                            <input type="checkbox" name="remember" value="1" class="rounded border-slate-300">
                             Ingat saya
                         </label>
                         <a href="{{ route('password.request') }}" class="text-indigo-600 hover:underline">Lupa
