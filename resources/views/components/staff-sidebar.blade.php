@@ -3,6 +3,7 @@
     // supaya tidak ada dead link ke modul yang belum dibangun skemanya.
     $builtRoutes = [
         'dashboard' => route('staff.dashboard'),
+        'academic-years' => route('academic-years.index'),
     ];
 @endphp
 
@@ -113,11 +114,31 @@
         <div>
             <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Lainnya</p>
 
-            <a href="#"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
-                <i class="ti ti-database text-[18px]"></i>
-                Data Master
-            </a>
+            <div>
+                <button @click="openGroup = openGroup === 'data-master' ? null : 'data-master'"
+                    class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+                    <span class="flex items-center gap-3">
+                        <i class="ti ti-database text-[18px]"></i>
+                        Data Master
+                    </span>
+                    <i class="ti ti-chevron-down text-[16px] transition-transform"
+                        :class="openGroup === 'data-master' && 'rotate-180'"></i>
+                </button>
+                <div x-show="openGroup === 'data-master'" x-transition class="pl-11 pr-3 space-y-1 mt-1">
+                    <a href="{{ $builtRoutes['academic-years'] }}"
+                        class="block px-3 py-2 rounded-lg text-sm transition
+                      {{ request()->routeIs('academic-years.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                        Tahun Ajaran
+                    </a>
+                    {{-- menyusul: Jenjang, Semester, Master Mapel --}}
+                    <a href="#"
+                        class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Jenjang</a>
+                    <a href="#"
+                        class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Master
+                        Mapel</a>
+                </div>
+            </div>
+
             <a href="#"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
                 <i class="ti ti-bell text-[18px]"></i>
