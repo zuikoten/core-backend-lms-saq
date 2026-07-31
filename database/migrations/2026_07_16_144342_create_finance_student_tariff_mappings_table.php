@@ -17,7 +17,9 @@ return new class extends Migration
             $table->foreignId('billing_tariff_id')->constrained()->restrictOnDelete();
             $table->foreignId('academic_year_id')->constrained()->restrictOnDelete();
             $table->foreignId('billing_type_id')->constrained()->restrictOnDelete();
-            $table->timestamps();
+            $table->text('note')->nullable(); //teks bebas, alasan pemetaan tarif ini (mis. "Surat keterangan tidak mampu dari RT/RW", "Beasiswa prestasi akademik 2026")
+            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete(); //keputusan dari siapa pemetaan tarif ini disetujui, misal kepala sekolah, bendahara, dll
+            $table->timestamps(); 
 
             $table->unique(
                 ['student_id', 'academic_year_id', 'billing_type_id'],

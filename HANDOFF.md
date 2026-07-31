@@ -70,6 +70,71 @@ Notification, ELibrary, Canteen) belum digarap sama sekali — masih peta
 jangka panjang di `ARCHITECTURE.md`, jangan buat menu/link/kode untuk modul
 ini dulu sampai gilirannya tiba.
 
+### ⚡ Keputusan: Jalur Minimal supaya Finance Cepat Jalan
+
+Karena kejar waktu, tidak semua isi Core/Student/Academic perlu dibangun
+**penuh** dulu sebelum Finance boleh disentuh — cukup irisan tipis yang
+benar-benar dipakai Finance sebagai referensi FK.
+
+> 📐 **Update penting:** skema tabel Core/Student/Finance (`academic_years`,
+> `parents`, `students`, `billing_types`, `billing_tariffs`,
+> `student_tariff_mappings`, `invoices`, `invoice_items`, `payment_channels`,
+> `invoice_payments`, `payment_gateway_transactions`, `webhook_logs`)
+> **sudah ada sebagai migration** dari awal project — bukan perlu dirancang
+> dari nol. Yang perlu digarap tinggal Action/Controller/Resource-nya
+> (mengikuti pola modul Auth: Controller tipis, logika bisnis di Actions/).
+> Skema ERD lengkapnya ada di file terpisah `skema-relasional-mermaid.md`.
+
+**Wajib ada dulu:**
+- `academic_years` (Core) — tahun ajaran aktif, invoice/tarif harus tertaut
+  ke periode tertentu
+- `students` (Student) — versi dasar saja. **Field data orang tua TIDAK
+  perlu diduplikasi ke sini** — itu sudah ada di tabel `parents` (dibuat
+  modul Auth, dipakai untuk aktivasi akun).
+
+**Boleh dilewati dulu (tidak wajib untuk Finance jalan):**
+- `semesters` — hanya perlu kalau billing-nya per-semester, bukan per tahun
+  ajaran penuh
+- **Seluruh modul Academic** (Kelas/Rombel/plotting) — tidak relevan buat
+  Finance. Keputusan bisnis: variasi tarif SPP levelnya **per-siswa**
+  (diskon kurang mampu, beasiswa penuh, tarif lebih tinggi untuk kebutuhan
+  khusus), BUKAN per-kelas/rombel (kasus "kelas 10A beda tarif dari 10B"
+  dianggap sangat jarang/tidak perlu didukung). `student_tariff_mappings`
+  yang nunjuk langsung ke `student_id` sudah cukup dan memang levelnya
+  tepat untuk kasus ini.
+- **Seluruh modul Teacher** — Finance tidak ada urusan sama guru sama
+  sekali.
+- Field profil siswa yang lebih lengkap (NISN, tanggal lahir, alamat, foto)
+  — bisa nyusul kapan saja lewat `ALTER TABLE ADD COLUMN` (aman, additive)
+
+**Keputusan tambahan kolom di `student_tariff_mappings`** (belum
+diterapkan ke migration, masih perlu ditambahkan manual): `note` (text,
+nullable — alasan pemetaan tarif ini, mis. "beasiswa prestasi") dan
+`approved_by` (FK nullable ke `users`, `nullOnDelete` — siapa yang
+menyetujui). Alasannya: diskon/beasiswa per siswa butuh audit trail yang
+eksplisit, bukan cuma bisa ditebak dari angka tarifnya.
+
+**`invoices.due_date` sengaja nullable** — bukan semua billing (tabungan
+sukarela, iuran kelas, denda perpustakaan, dll.) punya tenggat waktu jelas
+seperti SPP bulanan. Ini keputusan final, tidak perlu diubah.
+
+**Risiko jalur ini (dan kenapa risikonya kecil):**
+- Field profil siswa yang belum ada sekarang bisa nyusul lewat
+  `ALTER TABLE ADD COLUMN` — aman, tidak mengubah data yang sudah ada.
+- **Prinsip desain untuk fitur siswa yang sifatnya "banyak per siswa"
+  (bukan atribut tunggal):** Catatan BK, Rekam Medis UKS, dan rencana masa
+  depan (foto profil, galeri, portofolio, kalau nanti siswa punya dashboard
+  sendiri) — semua ini JANGAN jadi kolom baru di `students`. Ini kejadian/
+  koleksi berulang per siswa, jadi harus jadi **tabel terpisah** dengan
+  `student_id` sebagai FK, one-to-many (mis. `student_disciplinary_records`,
+  `student_health_records`, `student_profiles`, `student_portfolios`).
+  Nambah tabel begini **tidak menyentuh** skema `students` yang sudah ada
+  sama sekali — jadi risiko break jauh lebih kecil dari yang awalnya
+  dikira.
+- Kalau ternyata nanti Academic/Teacher *memang* dibutuhkan Finance di
+  luar dugaan (mis. laporan keuangan per rombel), itu nambah, bukan
+  bongkar ulang skema yang sudah dibuat di jalur minimal ini.
+
 ---
 
 ## 📝 Yang Sengaja Belum Dibangun (bukan bug, cuma dicatat)
