@@ -69,8 +69,9 @@
             </div>
         </div>
 
-        <a href="#"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+        <a href="{{ route('students.index') }}"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition
+             {{ request()->routeIs('students.*') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-100' }}">
             <i class="ti ti-users text-[18px]"></i>
             Siswa & Guru
         </a>

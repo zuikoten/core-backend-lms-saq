@@ -8,7 +8,7 @@ use Modules\Core\Controllers\AcademicYearController;
 // manual lewat Tinker/seeder dulu sebelum modul ini dipakai, konsisten
 // dengan catatan modul Auth ("granular permission menyusul begitu modul
 // terkait mulai digarap, di-seed oleh modul masing-masing").
-Route::middleware(['auth:web', 'permission:academic-years.manage', EnsureUserIsActive::class])
+Route::middleware(['auth:web', 'permission:core.manage', EnsureUserIsActive::class])
     ->prefix('academic-years')
     ->name('academic-years.')
     ->group(function () {

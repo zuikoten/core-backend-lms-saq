@@ -15,7 +15,7 @@
                     Nama Tahun Ajaran
                 </label>
                 <input type="text" name="year_name" id="year_name" value="{{ old('year_name', $academicYear->year_name) }}"
-                       class="w-full rounded-xl border-slate-200 text-sm focus:border-indigo-400 focus:ring-indigo-400">
+                       class="w-full rounded-xl border-slate-200 px-3.5 py-2.5 text-sm focus:border-indigo-400 focus:ring-indigo-400">
                 @error('year_name')
                     <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
                 @enderror

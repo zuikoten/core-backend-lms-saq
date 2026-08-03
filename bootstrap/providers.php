@@ -8,4 +8,5 @@ return [
     Modules\Auth\Providers\AuthModuleServiceProvider::class,
     Modules\Auth\Providers\AuthRateLimiterServiceProvider::class,
     Modules\Core\Providers\CoreModuleServiceProvider ::class,
+    Modules\Student\Providers\StudentModuleServiceProvider::class,
 ];
