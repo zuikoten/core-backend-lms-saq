@@ -109,3 +109,35 @@ app/Modules/Auth/
 - CRUD Role & Permission lewat UI (rencananya di menu sidebar "Pengaturan") — untuk sekarang masih manual lewat seeder/Tinker.
 - Notifikasi ke user asli kalau password mereka direset (mis. email "password Anda baru saja diubah").
 - Test otomatis untuk alur-alur kritis modul ini.
+
+---
+
+## 🔮 Rencana Masa Depan: Delegasi Akses Multi-Akun untuk Orang Tua
+
+**Masalah yang mau diselesaikan:** sekarang 1 keluarga (`parents`) cuma bisa punya 1 nomor HP/akun. Padahal kadang ayah dan ibu (atau wali lain) sama-sama mau pantau progress anak dari HP masing-masing.
+
+**Pendekatan yang dipilih: delegasi akses, bukan gabung identitas.** Sempat dipertimbangkan alternatif "1 keluarga boleh banyak nomor HP" (`parent_phone_numbers`), tapi itu berarti bongkar `ActivateParentAccountAction` dan seluruh alur aktivasi yang sudah stabil sekarang. Pendekatan yang dipilih justru **tidak mengubah apa pun yang sudah ada** — akun utama (yang aktivasi lewat nomor HP di `parents.phone_number`, seperti sekarang) tetap seperti biasa. Yang baru cuma lapisan akses tambahan di atasnya, mirip pola "beri wewenang staf toko" di aplikasi e-commerce: 1 data (toko/keluarga), banyak akun dengan level akses berbeda.
+
+### Tabel baru
+```text
+parent_access_grants
+├── id PK
+├── parent_id FK → parents.id (data keluarga yang diakses)
+├── user_id FK → users.id, unique (akun yang diberi akses)
+├── granted_by FK nullable → users.id (akun utama yang meng-invite, buat audit)
+└── timestamps
+```
+
+`parents` dan alur aktivasi akun utama **tidak berubah sama sekali**. Endpoint read-only milik parent (mis. `StudentApiController::index`) tinggal ditambah 1 kondisi: selain `parents.user_id = auth()->id()`, juga cek apakah ada baris di `parent_access_grants` untuk `parent_id` itu.
+
+### Alur: self-service, lewat OTP invite baru
+- **Cuma akun utama** yang boleh mengundang — bukan staf, bukan orang tua kedua yang belum diverifikasi.
+- Akun utama login di React → fitur "Undang orang tua/wali lain" → masukin nomor HP → OTP dikirim ke nomor itu (action_type baru, mis. `invite_access`, pakai `GenerateOtpAction`/`VerifyOtpAction` yang sudah ada, tidak perlu OTP generik baru) → begitu diverifikasi oleh pemilik nomor itu, baris baru masuk ke `parent_access_grants`, otomatis dapat akses.
+- **Pencabutan akses**: hanya akun utama yang boleh mencabut (konsisten dengan siapa yang mengundang), lewat React, bukan panel staf.
+
+### Wewenang: read-only dulu
+Di tahap awal, akun hasil delegasi **cuma bisa lihat**, tidak bisa aksi apa pun (termasuk nanti kalau ada pembayaran online). Kalau suatu saat dibuka jadi bisa ikut bayar SPP, ada beberapa hal yang perlu diantisipasi di desain Finance nanti (dicatat di sini supaya tidak jadi tempelan belakangan):
+- Perlu kolom audit tambahan semacam `paid_by` di transaksi pembayaran (nunjuk ke `users.id`) — bukan cuma `handover_by` yang ada sekarang — supaya jelas akun mana yang submit pembayaran kalau ada sengketa.
+- Potensi race condition: dua akun (ayah & ibu) coba bayar invoice yang sama di waktu nyaris bersamaan — butuh locking/idempotency di Action pembayaran.
+- Perlu diputuskan: notifikasi tagihan (WA/email) dikirim ke akun utama saja, atau ke semua akun yang delegated?
+- Secara struktur data ini aman dilakukan kapan saja (karena akses sudah dipisah dari kepemilikan data lewat `parent_access_grants`) — jadi bukan blocker, cuma perlu disiapkan pas modul Finance & Notification digarap.
