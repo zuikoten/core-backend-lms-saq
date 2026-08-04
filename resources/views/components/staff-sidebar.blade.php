@@ -51,7 +51,7 @@
                     :class="openGroup === 'akademik' && 'rotate-180'"></i>
             </button>
             <div x-show="openGroup === 'akademik'" x-transition class="pl-11 pr-3 space-y-1 mt-1">
-                <a href="#"
+                <a href="{{route('class-groups.index')}}"
                     class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Kelas
                     & Rombel</a>
                 <a href="#"
@@ -136,6 +136,7 @@
                     <a href="{{ route('grade-levels.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Tingkat /
                         Grade Level</a>
                     <a href="{{ route('semesters.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Semester</a>
+                    <a href="{{ route('classrooms.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Ruang Kelas</a>
                     <a href="#"
                         class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Master
                         Mapel</a>

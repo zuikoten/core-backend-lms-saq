@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Middleware\EnsureUserIsActive;
 use Modules\Core\Controllers\AcademicYearController;
+use Modules\Core\Controllers\ClassroomController;
 use Modules\Core\Controllers\GradeLevelController;
 use Modules\Core\Controllers\JenjangController;
 use Modules\Core\Controllers\SemesterController;
@@ -47,5 +48,14 @@ Route::middleware(['auth:web', 'permission:core.manage', EnsureUserIsActive::cla
         Route::put('{semester}', [SemesterController::class, 'update'])->name('update');
         Route::post('{semester}/activate', [SemesterController::class, 'activate'])->name('activate');
         Route::delete('{semester}', [SemesterController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('classrooms')->name('classrooms.')->group(function () {
+        Route::get('/', [ClassroomController::class, 'index'])->name('index');
+        Route::get('create', [ClassroomController::class, 'create'])->name('create');
+        Route::post('/', [ClassroomController::class, 'store'])->name('store');
+        Route::get('{classroom}/edit', [ClassroomController::class, 'edit'])->name('edit');
+        Route::put('{classroom}', [ClassroomController::class, 'update'])->name('update');
+        Route::delete('{classroom}', [ClassroomController::class, 'destroy'])->name('destroy');
     });
 });

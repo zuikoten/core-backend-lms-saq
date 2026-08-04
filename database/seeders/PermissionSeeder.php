@@ -19,8 +19,8 @@ class PermissionSeeder extends Seeder
         
         // Permission::firstOrCreate(['name' => 'finance.view', 'guard_name' => 'web']);
         // Permission::firstOrCreate(['name' => 'finance.manage', 'guard_name' => 'web']);
-        //Permission::firstOrCreate(['name' => 'academic.view', 'guard_name' => 'web']);
-        //Permission::firstOrCreate(['name' => 'academic.manage', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'academic.view', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'academic.manage', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'core.view', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'core.manage', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'student.view', 'guard_name' => 'web']);
