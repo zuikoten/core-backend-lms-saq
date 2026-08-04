@@ -51,9 +51,16 @@
                     :class="openGroup === 'akademik' && 'rotate-180'"></i>
             </button>
             <div x-show="openGroup === 'akademik'" x-transition class="pl-11 pr-3 space-y-1 mt-1">
-                <a href="{{route('class-groups.index')}}"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Kelas
-                    & Rombel</a>
+                <a href="{{ route('class-groups.index') }}"
+                    class="block px-3 py-2 rounded-lg text-sm transition
+                  {{ request()->routeIs('class-groups.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                    Kelas & Rombel
+                </a>
+                <a href="{{ route('class-group-students.index') }}"
+                    class="block px-3 py-2 rounded-lg text-sm transition
+                  {{ request()->routeIs('class-group-students.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                    Plotting Siswa
+                </a>
                 <a href="#"
                     class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Jadwal
                     Pelajaran</a>
@@ -64,8 +71,11 @@
                 <a href="#"
                     class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Penilaian
                     / Ujian</a>
-                <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Rapor</a>
+                <a href="{{ route('report-cards.index') }}"
+                    class="block px-3 py-2 rounded-lg text-sm transition
+                  {{ request()->routeIs('report-cards.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                    Rapor
+                </a>
             </div>
         </div>
 
@@ -133,10 +143,16 @@
                     </a>
                     {{-- menyusul: Jenjang, Semester, Master Mapel --}}
                     <a href="{{ route('jenjang.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Jenjang</a>
-                    <a href="{{ route('grade-levels.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Tingkat /
+                    <a href="{{ route('grade-levels.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Tingkat
+                        /
                         Grade Level</a>
-                    <a href="{{ route('semesters.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Semester</a>
-                    <a href="{{ route('classrooms.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Ruang Kelas</a>
+                    <a href="{{ route('semesters.index') }}"
+                        class="block px-3 py-2 rounded-lg text-sm ...">Semester</a>
+                    <a href="{{ route('classrooms.index') }}"
+                        class="block px-3 py-2 rounded-lg text-sm transition
+                        {{ request()->routeIs('classrooms.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                        Ruang Kelas
+                    </a>
                     <a href="#"
                         class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Master
                         Mapel</a>
