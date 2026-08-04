@@ -132,8 +132,10 @@
                         Tahun Ajaran
                     </a>
                     {{-- menyusul: Jenjang, Semester, Master Mapel --}}
-                    <a href="#"
-                        class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Jenjang</a>
+                    <a href="{{ route('jenjang.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Jenjang</a>
+                    <a href="{{ route('grade-levels.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Tingkat /
+                        Grade Level</a>
+                    <a href="{{ route('semesters.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Semester</a>
                     <a href="#"
                         class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Master
                         Mapel</a>
