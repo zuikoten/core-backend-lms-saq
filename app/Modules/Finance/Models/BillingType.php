@@ -12,6 +12,8 @@ class BillingType extends Model
         'is_recurring',
     ];
 
+    // Cast sebagai METHOD, konsisten dengan pola model-model terbaru
+    // (Student, AcademicYear, dll).
     protected function casts(): array
     {
         return [
@@ -19,7 +21,7 @@ class BillingType extends Model
         ];
     }
 
-    public function billingTariffs(): HasMany
+     public function billingTariffs(): HasMany
     {
         return $this->hasMany(BillingTariff::class);
     }

@@ -98,9 +98,21 @@
                     :class="openGroup === 'keuangan' && 'rotate-180'"></i>
             </button>
             <div x-show="openGroup === 'keuangan'" x-transition class="pl-11 pr-3 space-y-1 mt-1">
-                <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Tarif
-                    & Tagihan</a>
+                <a href="{{ route('finance.billing-types.index') }}"
+                    class="block px-3 py-2 rounded-lg text-sm transition
+                     {{ request()->routeIs('finance.billing-types.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                    Jenis Tagihan
+                </a>
+                <a href="{{ route('finance.payment-channels.index') }}"
+                    class="block px-3 py-2 rounded-lg text-sm transition
+                     {{ request()->routeIs('finance.payment-channels.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                    Kanal Pembayaran
+                </a>
+                <a href="{{ route('finance.billing-tariffs.index') }}"
+                    class="block px-3 py-2 rounded-lg text-sm transition
+                    {{ request()->routeIs('finance.billing-tariffs.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                    Tarif & Tagihan
+                </a>
                 <a href="#"
                     class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Pembayaran</a>
                 <a href="#"

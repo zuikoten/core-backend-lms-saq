@@ -10,4 +10,5 @@ return [
     Modules\Core\Providers\CoreModuleServiceProvider ::class,
     Modules\Student\Providers\StudentModuleServiceProvider::class,
     Modules\Academic\Providers\AcademicModuleServiceProvider::class,
+    Modules\Finance\Providers\FinanceModuleServiceProvider::class,
 ];
