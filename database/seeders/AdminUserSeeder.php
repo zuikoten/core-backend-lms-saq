@@ -11,7 +11,7 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         $admin = User::firstOrCreate(
-            ['phone_number' => '6281234567890'], // ganti sesuai nomor admin sekolah
+            ['phone_number' => '6281234567880'], // ganti sesuai nomor admin sekolah
             [
                 'email' => 'superadmin@sekolah.test',
                 'password' => Hash::make('password'), // WAJIB diganti sebelum produksi

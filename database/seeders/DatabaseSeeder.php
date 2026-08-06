@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,        // wajib pertama, karena AdminUserSeeder butuh role sudah ada
             PermissionSeeder::class,  // untuk setup permission panel.access, akses bebas bagi role manapun yang mau akses ke panel dashboard
+            ClassroomSeeder::class,
             AcademicYearSeeder::class,
             SemesterSeeder::class,
             JenjangSeeder::class,
@@ -19,6 +20,7 @@ class DatabaseSeeder extends Seeder
             PaymentChannelSeeder::class,
             BillingTariffSeeder::class,
             AdminUserSeeder::class,   // wajib setelah RoleSeeder
+            RegularUserSeeder::class, // wajib setelah RoleSeeder
         ]);
     }
 }

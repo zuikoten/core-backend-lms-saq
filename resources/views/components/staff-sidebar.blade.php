@@ -7,7 +7,16 @@
     ];
 @endphp
 
-<aside x-data="{ mobileOpen: false, openGroup: null }"
+<aside x-data="{
+    mobileOpen: false,
+    openGroup: '{{ request()->routeIs(['class-groups.*', 'class-group-students.*', 'report-cards.*'])
+        ? 'akademik'
+        : (request()->routeIs(['finance.*'])
+            ? 'keuangan'
+            : (request()->routeIs(['academic-years.*', 'jenjang.*', 'grade-levels.*', 'semesters.*', 'classrooms.*'])
+                ? 'data-master'
+                : null)) }}'
+}"
     class="w-64 shrink-0 bg-white border-r border-slate-100 flex flex-col h-screen sticky top-0">
     {{-- Brand --}}
     <div class="flex items-center gap-2.5 px-5 h-16 shrink-0">
@@ -50,7 +59,7 @@
                 <i class="ti ti-chevron-down text-[16px] transition-transform"
                     :class="openGroup === 'akademik' && 'rotate-180'"></i>
             </button>
-            <div x-show="openGroup === 'akademik'" x-transition class="pl-11 pr-3 space-y-1 mt-1">
+            <div x-show="openGroup === 'akademik'" x-collapse class="pl-11 pr-3 space-y-1 mt-1">
                 <a href="{{ route('class-groups.index') }}"
                     class="block px-3 py-2 rounded-lg text-sm transition
                   {{ request()->routeIs('class-groups.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
@@ -97,7 +106,7 @@
                 <i class="ti ti-chevron-down text-[16px] transition-transform"
                     :class="openGroup === 'keuangan' && 'rotate-180'"></i>
             </button>
-            <div x-show="openGroup === 'keuangan'" x-transition class="pl-11 pr-3 space-y-1 mt-1">
+            <div x-show="openGroup === 'keuangan'" x-collapse class="pl-11 pr-3 space-y-1 mt-1">
                 <a href="{{ route('finance.billing-types.index') }}"
                     class="block px-3 py-2 rounded-lg text-sm transition
                      {{ request()->routeIs('finance.billing-types.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
@@ -112,6 +121,11 @@
                     class="block px-3 py-2 rounded-lg text-sm transition
                     {{ request()->routeIs('finance.billing-tariffs.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
                     Tarif & Tagihan
+                </a>
+                <a href="{{ route('finance.student-tariff-mappings.index') }}"
+                    class="block px-3 py-2 rounded-lg text-sm transition
+                    {{ request()->routeIs('finance.student-tariff-mappings.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                    Pemetaan Tarif Siswa
                 </a>
                 <a href="#"
                     class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Pembayaran</a>
@@ -147,19 +161,26 @@
                     <i class="ti ti-chevron-down text-[16px] transition-transform"
                         :class="openGroup === 'data-master' && 'rotate-180'"></i>
                 </button>
-                <div x-show="openGroup === 'data-master'" x-transition class="pl-11 pr-3 space-y-1 mt-1">
+                <div x-show="openGroup === 'data-master'" x-collapse class="pl-11 pr-3 space-y-1 mt-1">
                     <a href="{{ $builtRoutes['academic-years'] }}"
                         class="block px-3 py-2 rounded-lg text-sm transition
                       {{ request()->routeIs('academic-years.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
                         Tahun Ajaran
                     </a>
-                    {{-- menyusul: Jenjang, Semester, Master Mapel --}}
-                    <a href="{{ route('jenjang.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Jenjang</a>
-                    <a href="{{ route('grade-levels.index') }}" class="block px-3 py-2 rounded-lg text-sm ...">Tingkat
-                        /
-                        Grade Level</a>
+
+                    <a href="{{ route('jenjang.index') }}"
+                        class="block px-3 py-2 rounded-lg text-sm transition
+                      {{ request()->routeIs('jenjang.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">Jenjang</a>
+
+                    <a href="{{ route('grade-levels.index') }}"
+                        class="block px-3 py-2 rounded-lg text-sm transition
+                      {{ request()->routeIs('grade-levels.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">Tingkat
+                        /Grade Level</a>
+
                     <a href="{{ route('semesters.index') }}"
-                        class="block px-3 py-2 rounded-lg text-sm ...">Semester</a>
+                        class="block px-3 py-2 rounded-lg text-sm transition
+                      {{ request()->routeIs('semesters.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">Semester</a>
+
                     <a href="{{ route('classrooms.index') }}"
                         class="block px-3 py-2 rounded-lg text-sm transition
                         {{ request()->routeIs('classrooms.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">

@@ -5,6 +5,7 @@ use Modules\Auth\Middleware\EnsureUserIsActive;
 use Modules\Finance\Controllers\BillingTariffController;
 use Modules\Finance\Controllers\BillingTypeController;
 use Modules\Finance\Controllers\PaymentChannelController;
+use Modules\Finance\Controllers\StudentTariffMappingController;
 
 Route::middleware(['auth:web', 'permission:finance.manage', EnsureUserIsActive::class])
     ->prefix('finance')
@@ -41,5 +42,19 @@ Route::middleware(['auth:web', 'permission:finance.manage', EnsureUserIsActive::
                 Route::get('{billingTariff}/edit', [BillingTariffController::class, 'edit'])->name('edit');
                 Route::put('{billingTariff}', [BillingTariffController::class, 'update'])->name('update');
                 Route::delete('{billingTariff}', [BillingTariffController::class, 'destroy'])->name('destroy');
+            });
+
+        Route::prefix('student-tariff-mappings')
+            ->name('student-tariff-mappings.')
+            ->group(function () {
+                Route::get('/', [StudentTariffMappingController::class, 'index'])->name('index');
+                Route::get('create', [StudentTariffMappingController::class, 'create'])->name('create');
+                Route::post('/', [StudentTariffMappingController::class, 'store'])->name('store');
+                Route::get('bulk-create', [StudentTariffMappingController::class, 'bulkCreate'])->name('bulk-create');
+                Route::post('bulk-preview', [StudentTariffMappingController::class, 'bulkPreview'])->name('bulk-preview');
+                Route::post('bulk-store', [StudentTariffMappingController::class, 'bulkStore'])->name('bulk-store');
+                Route::get('{studentTariffMapping}/edit', [StudentTariffMappingController::class, 'edit'])->name('edit');
+                Route::put('{studentTariffMapping}', [StudentTariffMappingController::class, 'update'])->name('update');
+                Route::delete('{studentTariffMapping}', [StudentTariffMappingController::class, 'destroy'])->name('destroy');
             });
     });

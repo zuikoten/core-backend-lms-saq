@@ -35,4 +35,9 @@ class StudentTariffMapping extends Model
     {
         return $this->belongsTo(BillingType::class);
     }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'approved_by');
+    }
 }
