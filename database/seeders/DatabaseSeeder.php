@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             BillingTariffSeeder::class,
             AdminUserSeeder::class,   // wajib setelah RoleSeeder
             RegularUserSeeder::class, // wajib setelah RoleSeeder
+            ParentStudentSeeder::class, // wajib setelah RoleSeeder
         ]);
     }
 }

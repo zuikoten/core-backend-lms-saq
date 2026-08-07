@@ -13,21 +13,21 @@ class RegularUserSeeder extends Seeder
         $users = [
             [
                 'email' => 'headmaster@sekolah.test',
-                'phone_number' => '081234567890',
+                'phone_number' => '082234567890',
                 'password' => bcrypt('password123'),
                 'is_active' => true,
                 'role' => 'kepala_sekolah', 
             ],
             [
                 'email' => 'staffadmin@sekolah.test',
-                'phone_number' => '081234567891',
+                'phone_number' => '082234567891',
                 'password' => bcrypt('password123'),
                 'is_active' => true,
                 'role' => 'staff_admin', 
             ],
             [
                 'email' => 'guru@example.com',
-                'phone_number' => '081234567892',
+                'phone_number' => '082234567892',
                 'password' => bcrypt('password123'),
                 'is_active' => true,
                 'role' => 'guru', 
