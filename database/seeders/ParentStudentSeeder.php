@@ -3,10 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
 use Modules\Student\Models\ParentProfile;
 use Modules\Student\Models\Student;
-use Illuminate\Support\Facades\Hash;
 
 class ParentStudentSeeder extends Seeder
 {
@@ -16,101 +14,75 @@ class ParentStudentSeeder extends Seeder
     public function run(): void
     {
         // Data orang tua yang akan digunakan
-        $parentsData = [
+        $parents = [
             [
                 'father_name' => 'Budi Santoso',
                 'mother_name' => 'Siti Rahayu',
                 'phone_number' => '081234567890',
                 'address' => 'Jl. Merdeka No. 123, Jakarta',
-                'email' => 'budi.santoso@email.com',
             ],
             [
                 'father_name' => 'Agus Wijaya',
                 'mother_name' => 'Dewi Lestari',
                 'phone_number' => '081234567891',
                 'address' => 'Jl. Sudirman No. 45, Bandung',
-                'email' => 'agus.wijaya@email.com',
             ],
             [
                 'father_name' => 'Hendra Gunawan',
                 'mother_name' => 'Rina Marlina',
                 'phone_number' => '081234567892',
                 'address' => 'Jl. Diponegoro No. 78, Surabaya',
-                'email' => 'hendra.gunawan@email.com',
             ],
             [
                 'father_name' => 'Slamet Riyadi',
                 'mother_name' => 'Yuni Astuti',
                 'phone_number' => '081234567893',
                 'address' => 'Jl. Gatot Subroto No. 90, Yogyakarta',
-                'email' => 'slamet.riyadi@email.com',
             ],
             [
                 'father_name' => 'Bambang Prasetyo',
                 'mother_name' => 'Indah Permata',
                 'phone_number' => '081234567894',
                 'address' => 'Jl. Pahlawan No. 56, Semarang',
-                'email' => 'bambang.prasetyo@email.com',
             ],
             [
                 'father_name' => 'Dedy Kusuma',
                 'mother_name' => 'Putri Wulandari',
                 'phone_number' => '081234567895',
                 'address' => 'Jl. Ahmad Yani No. 34, Medan',
-                'email' => 'dedy.kusuma@email.com',
             ],
             [
                 'father_name' => 'Rudi Hartono',
                 'mother_name' => 'Nina Safitri',
                 'phone_number' => '081234567896',
                 'address' => 'Jl. Thamrin No. 12, Makassar',
-                'email' => 'rudi.hartono@email.com',
             ],
             [
                 'father_name' => 'Eko Prasetyo',
                 'mother_name' => 'Maya Sari',
                 'phone_number' => '081234567897',
                 'address' => 'Jl. Juanda No. 67, Palembang',
-                'email' => 'eko.prasetyo@email.com',
             ],
             [
                 'father_name' => 'Andi Malik',
                 'mother_name' => 'Siti Nurhaliza',
                 'phone_number' => '081234567898',
                 'address' => 'Jl. Hasanuddin No. 89, Banjarmasin',
-                'email' => 'andi.malik@email.com',
             ],
             [
                 'father_name' => 'Fajar Nugroho',
                 'mother_name' => 'Ratna Dewi',
                 'phone_number' => '081234567899',
                 'address' => 'Jl. Veteran No. 23, Bali',
-                'email' => 'fajar.nugroho@email.com',
             ],
         ];
 
         // Simpan parent yang sudah dibuat untuk digunakan kembali
         $createdParents = [];
 
-        // Buat User dan ParentProfile untuk setiap orang tua
-        foreach ($parentsData as $parentData) {
-            // Buat User terlebih dahulu
-            $user = User::create([
-                'email' => $parentData['email'],
-                'phone_number' => $parentData['phone_number'],
-                'password' => Hash::make('password123'), // password default
-                'is_active' => true,
-            ]);
-
-            // Buat ParentProfile dengan user_id
-            $parent = ParentProfile::create([
-                'user_id' => $user->id,
-                'father_name' => $parentData['father_name'],
-                'mother_name' => $parentData['mother_name'],
-                'phone_number' => $parentData['phone_number'],
-                'address' => $parentData['address'],
-            ]);
-
+        // Buat 10 orang tua dengan data di atas
+        foreach ($parents as $parentData) {
+            $parent = ParentProfile::create($parentData);
             $createdParents[] = $parent;
         }
 
@@ -312,30 +284,21 @@ class ParentStudentSeeder extends Seeder
         foreach ($students as $studentData) {
             $parentIndex = $studentData['parent_index'];
             unset($studentData['parent_index']);
-            
+
             $studentData['parent_id'] = $createdParents[$parentIndex]->id;
-            
+
             Student::create($studentData);
         }
 
         // Tampilkan informasi di console
         $this->command->info('✅ ParentStudentSeeder completed successfully!');
-        $this->command->info('📊 Created:');
-        $this->command->info('  - ' . count($parentsData) . ' users');
-        $this->command->info('  - ' . count($createdParents) . ' parent profiles');
-        $this->command->info('  - ' . count($students) . ' students');
-        
+        $this->command->info('📊 Created ' . count($createdParents) . ' parents and ' . count($students) . ' students');
+
         // Tampilkan detail per parent
         $this->command->info("\n📋 Detail per parent:");
         foreach ($createdParents as $index => $parent) {
             $studentCount = Student::where('parent_id', $parent->id)->count();
-            $user = User::find($parent->user_id);
-            $this->command->info("  - {$parent->father_name} & {$parent->mother_name} (Email: {$user->email}): {$studentCount} anak");
+            $this->command->info("  - {$parent->father_name} & {$parent->mother_name}: {$studentCount} anak");
         }
-        
-        // Tampilkan contoh credential untuk login
-        $this->command->info("\n🔑 Contoh credential login:");
-        $this->command->info("  Email: budi.santoso@email.com");
-        $this->command->info("  Password: password123");
     }
 }
