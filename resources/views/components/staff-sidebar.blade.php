@@ -127,6 +127,11 @@
                     {{ request()->routeIs('finance.student-tariff-mappings.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
                     Pemetaan Tarif Siswa
                 </a>
+                <a href="{{ route('finance.invoices.index') }}"
+                    class="block px-3 py-2 rounded-lg text-sm transition
+                    {{ request()->routeIs('finance.invoices.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                    Invoice
+                </a>
                 <a href="#"
                     class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Pembayaran</a>
                 <a href="#"

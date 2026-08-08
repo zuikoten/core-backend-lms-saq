@@ -1,3 +1,4 @@
+// resources/js/modules/auth/otp-input.js
 document.addEventListener('alpine:init', () => {
     Alpine.data('otpInput', () => ({
         digits: ['', '', '', '', '', ''],

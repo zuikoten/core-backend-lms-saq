@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 use Modules\Academic\Models\ClassGroup;
 use Modules\Finance\Actions\BulkCreateStudentTariffMappingAction;
 use Modules\Finance\Actions\FindEligibleStudentsForBulkTariffMappingAction;
-use Modules\Finance\Requests\PreviewBulkStudentTariffMappingRequest;
+use Illuminate\Http\JsonResponse;
+use Modules\Finance\Requests\EligibleStudentsRequest;
 use Modules\Finance\Requests\StoreBulkStudentTariffMappingRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -87,21 +88,6 @@ class StudentTariffMappingController extends Controller
         return view('modules.finance.student-tariff-mappings.bulk-create', compact('billingTariffs', 'classGroups', 'kepalaSekolahOptions'));
     }
 
-    public function bulkPreview(PreviewBulkStudentTariffMappingRequest $request, FindEligibleStudentsForBulkTariffMappingAction $action): View
-    {
-        $billingTariff = BillingTariff::with(['billingType', 'academicYear'])->findOrFail($request->validated('billing_tariff_id'));
-        $classGroupId = $request->validated('filter_type') === 'class_group' ? $request->validated('class_group_id') : null;
-
-        $eligibleStudents = $action->execute($billingTariff, $classGroupId);
-
-        return view('modules.finance.student-tariff-mappings.bulk-preview', [
-            'billingTariff' => $billingTariff,
-            'eligibleStudents' => $eligibleStudents,
-            'note' => $request->validated('note'),
-            'approvedBy' => $request->validated('approved_by'),
-        ]);
-    }
-
     public function bulkStore(StoreBulkStudentTariffMappingRequest $request, BulkCreateStudentTariffMappingAction $action): RedirectResponse
     {
         $billingTariff = BillingTariff::findOrFail($request->validated('billing_tariff_id'));
@@ -119,5 +105,20 @@ class StudentTariffMappingController extends Controller
         return redirect()
             ->route('finance.student-tariff-mappings.index')
             ->with('status', $pesan);
+    }
+
+    public function eligibleStudents(EligibleStudentsRequest $request, FindEligibleStudentsForBulkTariffMappingAction $action): JsonResponse
+    {
+        $billingTariff = BillingTariff::findOrFail($request->validated('billing_tariff_id'));
+        $classGroupId = $request->validated('filter_type') === 'class_group' ? $request->validated('class_group_id') : null;
+
+        $students = $action->execute($billingTariff, $classGroupId);
+
+        return response()->json([
+            'students' => $students->map(fn ($student) => [
+                'id' => $student->id,
+                'full_name' => $student->full_name,
+            ]),
+        ]);
     }
 }

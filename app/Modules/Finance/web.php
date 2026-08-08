@@ -6,6 +6,7 @@ use Modules\Finance\Controllers\BillingTariffController;
 use Modules\Finance\Controllers\BillingTypeController;
 use Modules\Finance\Controllers\PaymentChannelController;
 use Modules\Finance\Controllers\StudentTariffMappingController;
+use Modules\Finance\Controllers\InvoiceController;
 
 Route::middleware(['auth:web', 'permission:finance.manage', EnsureUserIsActive::class])
     ->prefix('finance')
@@ -51,10 +52,25 @@ Route::middleware(['auth:web', 'permission:finance.manage', EnsureUserIsActive::
                 Route::get('create', [StudentTariffMappingController::class, 'create'])->name('create');
                 Route::post('/', [StudentTariffMappingController::class, 'store'])->name('store');
                 Route::get('bulk-create', [StudentTariffMappingController::class, 'bulkCreate'])->name('bulk-create');
-                Route::post('bulk-preview', [StudentTariffMappingController::class, 'bulkPreview'])->name('bulk-preview');
+                Route::get('eligible-students', [StudentTariffMappingController::class, 'eligibleStudents'])->name('eligible-students');
                 Route::post('bulk-store', [StudentTariffMappingController::class, 'bulkStore'])->name('bulk-store');
                 Route::get('{studentTariffMapping}/edit', [StudentTariffMappingController::class, 'edit'])->name('edit');
                 Route::put('{studentTariffMapping}', [StudentTariffMappingController::class, 'update'])->name('update');
                 Route::delete('{studentTariffMapping}', [StudentTariffMappingController::class, 'destroy'])->name('destroy');
+            });
+
+            Route::prefix('invoices')
+            ->name('invoices.')
+            ->group(function () {
+                Route::get('/', [InvoiceController::class, 'index'])->name('index');
+                Route::get('bulk-create', [InvoiceController::class, 'bulkCreate'])->name('bulk-create');
+                Route::get('eligible-students', [InvoiceController::class, 'eligibleStudents'])->name('eligible-students');
+                Route::post('bulk-store', [InvoiceController::class, 'bulkStore'])->name('bulk-store');
+                Route::get('manual-create', [InvoiceController::class, 'manualCreate'])->name('manual-create');
+                Route::post('manual-store', [InvoiceController::class, 'manualStore'])->name('manual-store');
+                Route::get('{invoice}', [InvoiceController::class, 'show'])->name('show');
+                Route::delete('{invoice}', [InvoiceController::class, 'destroy'])->name('destroy');
+                Route::post('{invoice}/items', [InvoiceController::class, 'storeItem'])->name('items.store');
+                Route::delete('{invoice}/items/{item}', [InvoiceController::class, 'destroyItem'])->name('items.destroy');
             });
     });
