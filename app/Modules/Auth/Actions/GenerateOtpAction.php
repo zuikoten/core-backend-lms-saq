@@ -36,8 +36,12 @@ class GenerateOtpAction
 
         // Notifiable sederhana: cukup User (kalau ada) atau objek anonim
         // dengan routeNotificationFor('whatsapp') mengarah ke $phoneNumber.
+        // WAJIB pakai trait Notifiable, bukan cuma routeNotificationFor() --
+        // method notify() itu asalnya dari trait ini, bukan method biasa.
         $notifiable = $user ?? new class($phoneNumber)
         {
+            use \Illuminate\Notifications\Notifiable;
+
             public function __construct(public string $phone_number) {}
 
             public function routeNotificationFor(string $channel): string
