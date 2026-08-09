@@ -46,13 +46,20 @@ class ParentAuthController extends Controller
 
         return match ($actionType) {
             'activation' => $this->handleActivation(
-                $verifyOtpAction, $activateParentAccountAction, $phoneNumber, $otpCode, $request->validated('password'),
+                $verifyOtpAction,
+                $activateParentAccountAction,
+                $phoneNumber,
+                $otpCode,
+                $request->validated('password'),
             ),
             'login' => $this->respondWithUserAndToken(
                 ...$authenticateParentWithOtpAction->execute($phoneNumber, $otpCode),
             ),
             'reset_password' => $this->handleResetPassword(
-                $resetPasswordWithOtpAction, $phoneNumber, $otpCode, $request->validated('new_password'),
+                $resetPasswordWithOtpAction,
+                $phoneNumber,
+                $otpCode,
+                $request->validated('new_password'),
             ),
         };
     }
@@ -80,9 +87,9 @@ class ParentAuthController extends Controller
     ): JsonResponse {
         $verifyOtpAction->execute('activation', $otpCode, phoneNumber: $phoneNumber);
 
-        $user = $activateParentAccountAction->execute($phoneNumber, $password);
+        $result = $activateParentAccountAction->execute($phoneNumber, $password);
 
-        return $this->respondWithUserAndToken($user, $user->createToken('parent-app'));
+        return $this->respondWithUserAndToken($result['user'], $result['token']);
     }
 
     private function handleResetPassword(

@@ -17,31 +17,33 @@ class ActivateParentAccountAction
      * @param  string|null  $password  Opsional — kalau null, parent murni OTP-only
      *                                  sampai dia set password sendiri nanti.
      */
-    public function execute(string $phoneNumber, ?string $password = null): User
-    {
-        $parentProfile = ParentProfile::query()
-            ->where('phone_number', $phoneNumber)
-            ->whereNull('user_id')
-            ->first();
+    public function execute(string $phoneNumber, ?string $password = null): array
+{
+    $parentProfile = ParentProfile::query()
+        ->where('phone_number', $phoneNumber)
+        ->whereNull('user_id')
+        ->first();
 
-        if (! $parentProfile) {
-            throw ValidationException::withMessages([
-                'phone_number' => 'Data orang tua tidak ditemukan, hubungi pihak sekolah.',
-            ]);
-        }
-
-        return DB::transaction(function () use ($parentProfile, $phoneNumber, $password) {
-            $user = User::create([
-                'phone_number' => $phoneNumber,
-                'password' => $password ? Hash::make($password) : null,
-                'is_active' => true,
-            ]);
-
-            $parentProfile->update(['user_id' => $user->id]);
-
-            $user->assignRole('parent');
-
-            return $user;
-        });
+    if (! $parentProfile) {
+        throw ValidationException::withMessages([
+            'phone_number' => 'Data orang tua tidak ditemukan, hubungi pihak sekolah.',
+        ]);
     }
+
+    return DB::transaction(function () use ($parentProfile, $phoneNumber, $password) {
+        $user = User::create([
+            'phone_number' => $phoneNumber,
+            'password' => $password ? Hash::make($password) : null,
+            'is_active' => true,
+        ]);
+
+        $parentProfile->update(['user_id' => $user->id]);
+
+        $user->assignRole('parent');
+
+        $token = $user->createToken('parent-app');
+
+        return ['user' => $user, 'token' => $token];
+    });
+}
 }
