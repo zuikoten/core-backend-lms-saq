@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Auth\Notifications\Channels\LogWhatsappGateway;
+use Modules\Auth\Notifications\Channels\PenyediaLayananWhatsappGateway;
 use Modules\Auth\Notifications\Channels\WhatsappChannel;
 use Modules\Auth\Notifications\Contracts\WhatsappGatewayInterface;
 
@@ -16,7 +17,7 @@ class AuthModuleServiceProvider extends ServiceProvider
     {
         // Ganti binding ini ke provider WA final (mis. FonnteWhatsappGateway)
         // saat sudah ditentukan — tidak ada kode lain yang perlu diubah.
-        $this->app->bind(WhatsappGatewayInterface::class, LogWhatsappGateway::class);
+        $this->app->bind(WhatsappGatewayInterface::class, PenyediaLayananWhatsappGateway::class);
     }
 
     public function boot(): void
