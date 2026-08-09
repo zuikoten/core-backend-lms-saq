@@ -3,7 +3,6 @@
 namespace Modules\Auth\Notifications;
 
 use Illuminate\Notifications\Notification;
-use Modules\Auth\Notifications\Contracts\WhatsappGatewayInterface;
 
 class SendOtpWhatsappNotification extends Notification
 {
