@@ -16,6 +16,8 @@ use Modules\Auth\Requests\ParentLoginRequest;
 use Modules\Auth\Requests\RequestOtpRequest;
 use Modules\Auth\Requests\VerifyOtpRequest;
 use Modules\Auth\Resources\AuthenticatedUserResource;
+use Modules\Auth\Requests\SetParentCredentialsRequest;
+use Modules\Auth\Actions\SetParentCredentialsAction;
 
 class ParentAuthController extends Controller
 {
@@ -66,7 +68,7 @@ class ParentAuthController extends Controller
 
     public function login(ParentLoginRequest $request, AuthenticateParentWithPasswordAction $action): JsonResponse
     {
-        $result = $action->execute($request->validated('phone_number'), $request->validated('password'));
+        $result = $action->execute($request->validated('email'), $request->validated('password'));
 
         return $this->respondWithUserAndToken($result['user'], $result['token']);
     }
@@ -76,6 +78,18 @@ class ParentAuthController extends Controller
         $request->user()->currentAccessToken()?->delete();
 
         return response()->json(['message' => 'Berhasil logout.']);
+    }
+
+    /**
+     * Parent yang SUDAH login (email/password masih NULL setelah aktivasi
+     * OTP) isi email+password sendiri di sini -- baru setelah ini dia bisa
+     * pakai jalur login email+password juga, mirip staf.
+     */
+    public function setCredentials(SetParentCredentialsRequest $request, SetParentCredentialsAction $action): JsonResponse
+    {
+        $user = $action->execute($request->user(), $request->validated('email'), $request->validated('password'));
+
+        return (new AuthenticatedUserResource($user))->response();
     }
 
     private function handleActivation(

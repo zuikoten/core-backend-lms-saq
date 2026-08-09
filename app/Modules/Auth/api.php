@@ -16,4 +16,7 @@ Route::prefix('auth')->group(function () {
 
     Route::post('logout', [ParentAuthController::class, 'logout'])
         ->middleware(['auth:sanctum', EnsureUserIsActive::class]);
+
+    Route::post('credentials', [ParentAuthController::class, 'setCredentials'])
+        ->middleware(['auth:sanctum', EnsureUserIsActive::class]);
 });

@@ -4,7 +4,7 @@ namespace Modules\Auth\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ParentLoginRequest extends FormRequest
+class SetParentCredentialsRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,8 +14,8 @@ class ParentLoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }
 }
