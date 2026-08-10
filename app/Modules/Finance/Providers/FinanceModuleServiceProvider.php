@@ -9,7 +9,10 @@ class FinanceModuleServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        Route::middleware('web')->group(__DIR__.'/../web.php');
+        Route::middleware('web')->group(__DIR__ . '/../web.php');
+        Route::prefix('api')
+            ->middleware('api')
+            ->group(__DIR__ . '/../api.php');
 
         // api.php belum ada — BillingType & PaymentChannel murni staf-only
         // (master data), belum ada konsumen dari sisi orang tua. Tambahkan
