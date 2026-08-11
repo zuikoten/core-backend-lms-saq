@@ -134,9 +134,11 @@
                 </a>
                 <a href="#"
                     class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Pembayaran</a>
-                <a href="#"
-                    class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">Laporan
-                    Keuangan</a>
+                <a href="{{ route('finance.reports.index') }}"
+                    class="block px-3 py-2 rounded-lg text-sm transition
+                    {{ request()->routeIs('finance.reports.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                    Laporan Keuangan
+                </a>
             </div>
         </div>
 

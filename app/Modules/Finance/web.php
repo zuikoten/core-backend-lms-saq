@@ -7,6 +7,7 @@ use Modules\Finance\Controllers\BillingTypeController;
 use Modules\Finance\Controllers\PaymentChannelController;
 use Modules\Finance\Controllers\StudentTariffMappingController;
 use Modules\Finance\Controllers\InvoiceController;
+use Modules\Finance\Controllers\FinancialReportController;
 
 Route::middleware(['auth:web', 'permission:finance.manage', EnsureUserIsActive::class])
     ->prefix('finance')
@@ -72,5 +73,15 @@ Route::middleware(['auth:web', 'permission:finance.manage', EnsureUserIsActive::
                 Route::delete('{invoice}', [InvoiceController::class, 'destroy'])->name('destroy');
                 Route::post('{invoice}/items', [InvoiceController::class, 'storeItem'])->name('items.store');
                 Route::delete('{invoice}/items/{item}', [InvoiceController::class, 'destroyItem'])->name('items.destroy');
+            });
+
+            Route::prefix('reports')
+            ->name('reports.')
+            ->group(function () {
+                Route::get('/', [FinancialReportController::class, 'index'])->name('index');
+                Route::get('monthly-recap', [FinancialReportController::class, 'monthlyRecap'])->name('monthly-recap');
+                Route::get('outstanding', [FinancialReportController::class, 'outstanding'])->name('outstanding');
+                Route::get('payment-channel-recap', [FinancialReportController::class, 'paymentChannelRecap'])->name('payment-channel-recap');
+                Route::get('component-breakdown', [FinancialReportController::class, 'componentBreakdown'])->name('component-breakdown');
             });
     });
