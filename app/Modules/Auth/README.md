@@ -8,7 +8,7 @@ Modul ini menangani seluruh urusan autentikasi & otorisasi sistem: login, aktiva
 
 | | Staf sekolah | Orang tua/wali |
 |---|---|---|
-| Contoh role | superadmin (sekarang), guru/kepala sekolah/bendahara (rencana) | parent |
+| Contoh role | `superadmin` (lowercase, yang sudah ada sekarang), guru/kepala_sekolah/bendahara (rencana) | parent |
 | Guard | `web` (sesi Blade) | `sanctum` (token, dikonsumsi React) |
 | Cara masuk | Email+password **atau** OTP WhatsApp | OTP WhatsApp **atau** password |
 | Dibuat lewat | Seeder/Tinker manual — **tidak ada self-register** | Aktivasi mandiri, harus cocok dengan data `parents` yang sudah diinput staf lebih dulu |

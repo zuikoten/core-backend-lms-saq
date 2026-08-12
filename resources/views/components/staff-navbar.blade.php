@@ -1,3 +1,5 @@
+<!-- resources/views/components/staff-navbar.blade.php -->
+
 @props(['title' => 'Dashboard'])
 
 <header class="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-6 sticky top-0 z-10">

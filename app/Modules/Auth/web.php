@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Controllers\AuthController;
 use Modules\Auth\Controllers\StaffPasswordResetController;
+use Modules\Auth\Controllers\UserController;
+use Modules\Auth\Controllers\RoleController;
 
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [AuthController::class, 'login'])
@@ -63,3 +65,27 @@ Route::middleware(['auth:web', 'permission:panel.access', \Modules\Auth\Middlewa
 
     Route::post('staff/logout', [AuthController::class, 'logout'])->name('staff.logout');
 });
+
+Route::middleware(['auth:web', 'permission:user.manage', \Modules\Auth\Middleware\EnsureUserIsActive::class])
+    ->prefix('users')
+    ->name('users.')
+    ->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('create', [UserController::class, 'create'])->name('create');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('{user}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('{user}', [UserController::class, 'destroy'])->name('destroy');
+    });
+
+Route::middleware(['auth:web', 'permission:role.manage', \Modules\Auth\Middleware\EnsureUserIsActive::class])
+    ->prefix('roles')
+    ->name('roles.')
+    ->group(function () {
+        Route::get('/', [RoleController::class, 'index'])->name('index');
+        Route::get('create', [RoleController::class, 'create'])->name('create');
+        Route::post('/', [RoleController::class, 'store'])->name('store');
+        Route::get('{role}/edit', [RoleController::class, 'edit'])->name('edit');
+        Route::put('{role}', [RoleController::class, 'update'])->name('update');
+        Route::delete('{role}', [RoleController::class, 'destroy'])->name('destroy');
+    });

@@ -1,3 +1,5 @@
+<!-- resources/views/layouts/staff.blade.php -->
+
 <!DOCTYPE html>
 <html lang="id">
 

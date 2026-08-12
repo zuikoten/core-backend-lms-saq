@@ -1,3 +1,5 @@
+<!-- resources/views/components/staff-sidebar.blade.php -->
+
 @php
     // Modul yang sudah punya halaman nyata. Selain ini, link diarahkan ke "#"
     // supaya tidak ada dead link ke modul yang belum dibangun skemanya.
@@ -10,12 +12,14 @@
 <aside x-data="{
     mobileOpen: false,
     openGroup: '{{ request()->routeIs(['class-groups.*', 'class-group-students.*', 'report-cards.*'])
-        ? 'akademik'
-        : (request()->routeIs(['finance.*'])
-            ? 'keuangan'
-            : (request()->routeIs(['academic-years.*', 'jenjang.*', 'grade-levels.*', 'semesters.*', 'classrooms.*'])
-                ? 'data-master'
-                : null)) }}'
+    ? 'akademik'
+    : (request()->routeIs(['finance.*'])
+        ? 'keuangan'
+        : (request()->routeIs(['academic-years.*', 'jenjang.*', 'grade-levels.*', 'semesters.*', 'classrooms.*'])
+            ? 'data-master'
+            : (request()->routeIs(['users.*', 'roles.*'])
+                ? 'pengaturan'
+                : null))) }}'
 }"
     class="w-64 shrink-0 bg-white border-r border-slate-100 flex flex-col h-screen sticky top-0">
     {{-- Brand --}}
@@ -204,11 +208,29 @@
                 <i class="ti ti-bell text-[18px]"></i>
                 Notifikasi
             </a>
-            <a href="#"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
-                <i class="ti ti-settings text-[18px]"></i>
-                Pengaturan
-            </a>
+            <div>
+                <button @click="openGroup = openGroup === 'pengaturan' ? null : 'pengaturan'"
+                    class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+                    <span class="flex items-center gap-3">
+                        <i class="ti ti-settings text-[18px]"></i>
+                        Pengaturan
+                    </span>
+                    <i class="ti ti-chevron-down text-[16px] transition-transform"
+                        :class="openGroup === 'pengaturan' && 'rotate-180'"></i>
+                </button>
+                <div x-show="openGroup === 'pengaturan'" x-collapse class="pl-11 pr-3 space-y-1 mt-1">
+                    <a href="{{ route('users.index') }}"
+                        class="block px-3 py-2 rounded-lg text-sm transition
+          {{ request()->routeIs('users.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                        Pengguna
+                    </a>
+                    <a href="{{ route('roles.index') }}"
+                        class="block px-3 py-2 rounded-lg text-sm transition
+          {{ request()->routeIs('roles.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                        Role & Hak Akses
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
 

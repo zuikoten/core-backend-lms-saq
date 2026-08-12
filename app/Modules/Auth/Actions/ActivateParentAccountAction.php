@@ -39,7 +39,7 @@ class ActivateParentAccountAction
 
         $parentProfile->update(['user_id' => $user->id]);
 
-        $user->assignRole('parent');
+        $user->assignRole(\Spatie\Permission\Models\Role::findByName('parent', 'sanctum'));
 
         $token = $user->createToken('parent-app');
 
