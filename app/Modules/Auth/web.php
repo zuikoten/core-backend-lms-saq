@@ -5,6 +5,7 @@ use Modules\Auth\Controllers\AuthController;
 use Modules\Auth\Controllers\StaffPasswordResetController;
 use Modules\Auth\Controllers\UserController;
 use Modules\Auth\Controllers\RoleController;
+use Modules\Auth\Controllers\ProfileController;
 
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [AuthController::class, 'login'])
@@ -64,6 +65,13 @@ Route::middleware(['auth:web', 'permission:panel.access', \Modules\Auth\Middlewa
     })->name('staff.dashboard');
 
     Route::post('staff/logout', [AuthController::class, 'logout'])->name('staff.logout');
+
+    // Profile management (self-service)
+    Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('profile/email', [ProfileController::class, 'updateEmail'])->name('profile.email.update');
+    Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
 });
 
 Route::middleware(['auth:web', 'permission:user.manage', \Modules\Auth\Middleware\EnsureUserIsActive::class])

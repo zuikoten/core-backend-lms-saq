@@ -11,6 +11,15 @@
                 @csrf
 
                 <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Nama Lengkap</label>
+                    <input type="text" name="name" value="{{ old('name') }}" required
+                        class="w-full rounded-xl border-slate-200 px-3.5 py-2.5 text-sm focus:border-indigo-400 focus:ring-indigo-400">
+                    @error('name')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
                     <input type="email" name="email" value="{{ old('email') }}"
                         class="w-full rounded-xl border-slate-200 px-3.5 py-2.5 text-sm focus:border-indigo-400 focus:ring-indigo-400">

@@ -12,14 +12,25 @@
 <aside x-data="{
     mobileOpen: false,
     openGroup: '{{ request()->routeIs(['class-groups.*', 'class-group-students.*', 'report-cards.*'])
-    ? 'akademik'
-    : (request()->routeIs(['finance.*'])
-        ? 'keuangan'
-        : (request()->routeIs(['academic-years.*', 'jenjang.*', 'grade-levels.*', 'semesters.*', 'classrooms.*'])
-            ? 'data-master'
-            : (request()->routeIs(['users.*', 'roles.*'])
-                ? 'pengaturan'
-                : null))) }}'
+        ? 'akademik'
+        : (request()->routeIs(['finance.*'])
+            ? 'keuangan'
+            : (request()->routeIs(['academic-years.*', 'jenjang.*', 'grade-levels.*', 'semesters.*', 'classrooms.*'])
+                ? 'dataMaster'
+                : (request()->routeIs(['users.*', 'roles.*'])
+                    ? 'pengaturan'
+                    : null))) }}',
+    toggleGroup(name) {
+        this.openGroup = this.openGroup === name ? null : name;
+
+        if (this.openGroup === name) {
+            this.$nextTick(() => {
+                setTimeout(() => {
+                    this.$refs[name + 'Panel']?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 260);
+            });
+        }
+    }
 }"
     class="w-64 shrink-0 bg-white border-r border-slate-100 flex flex-col h-screen sticky top-0">
     {{-- Brand --}}
@@ -54,7 +65,7 @@
 
         {{-- AKADEMIK --}}
         <div>
-            <button @click="openGroup = openGroup === 'akademik' ? null : 'akademik'"
+            <button @click="toggleGroup('akademik')"
                 class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
                 <span class="flex items-center gap-3">
                     <i class="ti ti-books text-[18px]"></i>
@@ -63,7 +74,7 @@
                 <i class="ti ti-chevron-down text-[16px] transition-transform"
                     :class="openGroup === 'akademik' && 'rotate-180'"></i>
             </button>
-            <div x-show="openGroup === 'akademik'" x-collapse class="pl-11 pr-3 space-y-1 mt-1">
+            <div x-ref="akademikPanel" x-show="openGroup === 'akademik'" x-collapse class="pl-11 pr-3 space-y-1 mt-1">
                 <a href="{{ route('class-groups.index') }}"
                     class="block px-3 py-2 rounded-lg text-sm transition
                   {{ request()->routeIs('class-groups.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
@@ -101,7 +112,7 @@
 
         {{-- KEUANGAN --}}
         <div>
-            <button @click="openGroup = openGroup === 'keuangan' ? null : 'keuangan'"
+            <button @click="toggleGroup('keuangan')"
                 class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
                 <span class="flex items-center gap-3">
                     <i class="ti ti-cash text-[18px]"></i>
@@ -110,7 +121,7 @@
                 <i class="ti ti-chevron-down text-[16px] transition-transform"
                     :class="openGroup === 'keuangan' && 'rotate-180'"></i>
             </button>
-            <div x-show="openGroup === 'keuangan'" x-collapse class="pl-11 pr-3 space-y-1 mt-1">
+            <div x-ref="keuanganPanel" x-show="openGroup === 'keuangan'" x-collapse class="pl-11 pr-3 space-y-1 mt-1">
                 <a href="{{ route('finance.billing-types.index') }}"
                     class="block px-3 py-2 rounded-lg text-sm transition
                      {{ request()->routeIs('finance.billing-types.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
@@ -163,16 +174,17 @@
             <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Lainnya</p>
 
             <div>
-                <button @click="openGroup = openGroup === 'data-master' ? null : 'data-master'"
+                <button @click="toggleGroup('dataMaster')"
                     class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
                     <span class="flex items-center gap-3">
                         <i class="ti ti-database text-[18px]"></i>
                         Data Master
                     </span>
                     <i class="ti ti-chevron-down text-[16px] transition-transform"
-                        :class="openGroup === 'data-master' && 'rotate-180'"></i>
+                        :class="openGroup === 'dataMaster' && 'rotate-180'"></i>
                 </button>
-                <div x-show="openGroup === 'data-master'" x-collapse class="pl-11 pr-3 space-y-1 mt-1">
+                <div x-ref="dataMasterPanel" x-show="openGroup === 'dataMaster'" x-collapse
+                    class="pl-11 pr-3 space-y-1 mt-1">
                     <a href="{{ $builtRoutes['academic-years'] }}"
                         class="block px-3 py-2 rounded-lg text-sm transition
                       {{ request()->routeIs('academic-years.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
@@ -209,7 +221,7 @@
                 Notifikasi
             </a>
             <div>
-                <button @click="openGroup = openGroup === 'pengaturan' ? null : 'pengaturan'"
+                <button @click="toggleGroup('pengaturan')"
                     class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
                     <span class="flex items-center gap-3">
                         <i class="ti ti-settings text-[18px]"></i>
@@ -218,16 +230,21 @@
                     <i class="ti ti-chevron-down text-[16px] transition-transform"
                         :class="openGroup === 'pengaturan' && 'rotate-180'"></i>
                 </button>
-                <div x-show="openGroup === 'pengaturan'" x-collapse class="pl-11 pr-3 space-y-1 mt-1">
+                <div x-ref="pengaturanPanel" x-show="openGroup === 'pengaturan'" x-collapse
+                    class="pl-11 pr-3 space-y-1 mt-1">
                     <a href="{{ route('users.index') }}"
                         class="block px-3 py-2 rounded-lg text-sm transition
-          {{ request()->routeIs('users.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                        {{ request()->routeIs('users.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
                         Pengguna
                     </a>
                     <a href="{{ route('roles.index') }}"
                         class="block px-3 py-2 rounded-lg text-sm transition
-          {{ request()->routeIs('roles.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                        {{ request()->routeIs('roles.*') ? 'text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
                         Role & Hak Akses
+                    </a>
+                    <a href="#"
+                        class="block px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700">
+                        Pengaturan Lainnya
                     </a>
                 </div>
             </div>
@@ -238,13 +255,20 @@
     <div class="p-3 border-t border-slate-100 relative">
         <button type="button" @click="confirmingLogout = true"
             class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-red-100 transition text-left group">
+            <!-- Avatar -->
             <div
-                class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 group-hover:bg-red-200 group-hover:text-red-600 flex items-center justify-center text-sm font-semibold transition-colors">
-                {{ strtoupper(substr(auth()->user()->email, 0, 1)) }}
+                class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 group-hover:bg-red-200 group-hover:text-red-600 flex items-center justify-center text-sm font-semibold transition-colors overflow-hidden">
+                @if (auth()->user()->avatar)
+                    <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="Avatar"
+                        class="w-full h-full object-cover">
+                @else
+                    {{ strtoupper(substr(auth()->user()->name ?? (auth()->user()->email ?? auth()->user()->phone_number), 0, 1)) }}
+                @endif
             </div>
+            <!-- User info -->
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-slate-700 group-hover:text-red-800 truncate transition-colors">
-                    {{ auth()->user()->email }}</p>
+                    {{ auth()->user()->name ?? (auth()->user()->email ?? auth()->user()->phone_number) }}</p>
                 <p class="text-xs text-slate-400 group-hover:text-red-500 transition-colors">
                     {{ ucfirst(auth()->user()->getRoleNames()->first() ?? '-') }}</p>
             </div>

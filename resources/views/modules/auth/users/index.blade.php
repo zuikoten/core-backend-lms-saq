@@ -33,12 +33,6 @@
         @endif
 
         <form method="GET" action="{{ route('users.index') }}" class="mb-4 flex flex-wrap gap-3 items-center">
-            <div class="flex-1 min-w-[200px]">
-                <input type="text" name="search" value="{{ request('search') }}"
-                    placeholder="Cari email atau nomor HP..."
-                    class="w-full rounded-xl border-slate-200 px-3.5 py-2.5 text-sm focus:border-indigo-400 focus:ring-indigo-400">
-            </div>
-
             <select name="role" onchange="this.form.submit()"
                 class="rounded-xl border-slate-200 px-3.5 py-2.5 text-sm focus:border-indigo-400 focus:ring-indigo-400">
                 <option value="">Semua Role</option>
@@ -48,6 +42,13 @@
                     </option>
                 @endforeach
             </select>
+
+            <div class="flex-1 min-w-[200px]">
+                <input type="text" name="search" value="{{ request('search') }}"
+                    placeholder="Cari email atau nomor HP..."
+                    class="w-full rounded-xl border-slate-200 px-3.5 py-2.5 text-sm focus:border-indigo-400 focus:ring-indigo-400">
+            </div>
+
 
             <button type="submit"
                 class="rounded-xl bg-slate-100 text-slate-600 text-sm font-medium px-4 py-2.5 hover:bg-slate-200 transition">
@@ -76,7 +77,7 @@
                     @forelse ($users as $user)
                         <tr>
                             <td class="px-5 py-3.5">
-                                <p class="font-medium text-slate-700">{{ $user->email ?? '-' }}</p>
+                                <p class="font-medium text-slate-700">{{ $user->name ?? '-' }}</p>
                                 <p class="text-xs text-slate-400">{{ $user->phone_number }}</p>
                             </td>
                             <td class="px-5 py-3.5">

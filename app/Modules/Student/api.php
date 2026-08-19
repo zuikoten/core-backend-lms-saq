@@ -8,4 +8,5 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])
     ->prefix('students')
     ->group(function () {
         Route::get('/', [StudentApiController::class, 'index']);
+        Route::get('/parent', [StudentApiController::class, 'parent']);
     });

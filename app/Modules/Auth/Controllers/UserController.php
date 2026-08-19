@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Auth\Actions\ListStaffUsersAction;
 use Modules\Auth\Actions\CreateUserAction;
 use Modules\Auth\Actions\DeleteUserAction;
 use Modules\Auth\Actions\UpdateUserAction;
@@ -26,23 +27,10 @@ class UserController extends Controller
      * masing-masing (lihat ActivateParentAccountAction), bukan hal yang
      * seharusnya diubah manual lewat form staf ini.
      */
-    public function index(Request $request): View
+    public function index(Request $request, ListStaffUsersAction $action): View
     {
         $roles = Role::where('guard_name', 'web')->orderBy('name')->get();
-
-        $users = User::with('roles')
-            ->whereHas('roles', fn($q) => $q->where('guard_name', 'web'))
-            ->when($request->filled('role'), function ($q) use ($request) {
-                $q->whereHas('roles', fn($q2) => $q2->where('name', $request->role)->where('guard_name', 'web'));
-            })
-            ->when($request->filled('search'), function ($q) use ($request) {
-                $search = $request->string('search');
-                $q->where(fn($q2) => $q2->where('email', 'like', "%{$search}%")
-                    ->orWhere('phone_number', 'like', "%{$search}%"));
-            })
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
+        $users = $action->execute($request->only(['search', 'role']));
 
         return view('modules.auth.users.index', compact('users', 'roles'));
     }

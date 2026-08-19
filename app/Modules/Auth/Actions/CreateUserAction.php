@@ -15,6 +15,7 @@ class CreateUserAction
     public function execute(array $data): User
     {
         $user = User::create([
+            'name' => $data['name'],
             'email' => $data['email'] ?? null,
             'phone_number' => $data['phone_number'],
             'password' => Hash::make($data['password']),

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Modules\Student\Models\ParentProfile;
 use Modules\Student\Resources\StudentResource;
+use Modules\Student\Resources\ParentProfileResource;
 
 /**
  * Scope query SELALU dibatasi ke parent_id milik user yang login lewat
@@ -23,5 +24,14 @@ class StudentApiController extends Controller
             ->firstOrFail();
 
         return StudentResource::collection($parentProfile->students);
+    }
+
+    public function parent(Request $request): ParentProfileResource
+    {
+        $parentProfile = ParentProfile::query()
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        return new ParentProfileResource($parentProfile);
     }
 }
