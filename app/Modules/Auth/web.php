@@ -69,10 +69,16 @@ Route::middleware(['auth:web', 'permission:panel.access', \Modules\Auth\Middlewa
     // Profile management (self-service)
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('profile/email', [ProfileController::class, 'updateEmail'])->name('profile.email.update');
-    Route::put('profile/phone', [\Modules\Auth\Controllers\ProfileController::class, 'updatePhone'])->name('profile.phone.update');
-    Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
+    Route::put('profile/email', [ProfileController::class, 'updateEmail'])
+        ->middleware('throttle:sensitive-profile-update')
+        ->name('profile.email.update');
+    Route::put('profile/phone', [ProfileController::class, 'updatePhone'])
+        ->middleware('throttle:sensitive-profile-update')
+        ->name('profile.phone.update');
+    Route::put('profile/password', [ProfileController::class, 'updatePassword'])
+        ->middleware('throttle:sensitive-profile-update')
+        ->name('profile.password.update');
 });
 
 Route::middleware(['auth:web', 'permission:user.manage', \Modules\Auth\Middleware\EnsureUserIsActive::class])

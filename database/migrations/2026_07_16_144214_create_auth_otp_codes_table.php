@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('otp_codes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->string('phone_number')->nullable(); // hanya diisi saat action_type = activation
+            $table->string('phone_number')->nullable(); // diisi saat action_type = activation (nomor pendaftar) atau change_phone (nomor baru yang mau diverifikasi)
             $table->string('otp_code');
-            $table->enum('action_type', ['login', 'activation', 'reset_password']);
+            $table->enum('action_type', ['login', 'activation', 'reset_password', 'change_phone']);
             $table->timestamp('expires_at');
             $table->boolean('is_used')->default(false);
             $table->unsignedTinyInteger('attempts')->default(0);

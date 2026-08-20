@@ -14,7 +14,7 @@ class GenerateOtpAction
     private const EXPIRES_IN_MINUTES = 5;
 
     /**
-     * @param  string  $actionType  'activation' | 'login' | 'reset_password'
+     * @param  string  $actionType  'activation' | 'login' | 'reset_password' | 'change_phone'
      * @param  string  $phoneNumber  Nomor sudah dinormalisasi oleh FormRequest (format 62xxxxxxxxxx)
      * @param  User|null  $user  Wajib diisi untuk login/reset_password, WAJIB null untuk activation
      */
@@ -63,7 +63,7 @@ class GenerateOtpAction
             ]);
         }
 
-        if (in_array($actionType, ['login', 'reset_password'], true) && $user === null) {
+        if (in_array($actionType, ['login', 'reset_password', 'change_phone'], true) && $user === null) {
             throw ValidationException::withMessages([
                 'phone_number' => 'Nomor belum terdaftar, hubungi pihak sekolah.',
             ]);
