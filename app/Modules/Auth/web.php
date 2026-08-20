@@ -70,6 +70,7 @@ Route::middleware(['auth:web', 'permission:panel.access', \Modules\Auth\Middlewa
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/email', [ProfileController::class, 'updateEmail'])->name('profile.email.update');
+    Route::put('profile/phone', [\Modules\Auth\Controllers\ProfileController::class, 'updatePhone'])->name('profile.phone.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
 });

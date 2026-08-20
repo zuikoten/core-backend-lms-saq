@@ -35,7 +35,7 @@ class UpdateProfileRequest extends FormRequest
                 'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/',
                 Rule::unique('users', 'username')->ignore($this->user()->id),
             ],
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192', 'dimensions:max_width=8000,max_height=8000'],
         ];
     }
 

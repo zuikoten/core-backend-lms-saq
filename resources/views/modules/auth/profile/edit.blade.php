@@ -110,6 +110,50 @@
             </form>
         </div>
 
+        {{-- Ganti Nomor HP --}}
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+            <h2 class="text-sm font-semibold text-slate-800 mb-1">Ganti Nomor HP</h2>
+            <p class="text-xs text-slate-400 mb-4">Nomor HP dipakai untuk OTP login & reset password — perlu konfirmasi
+                password.</p>
+
+            <form method="POST" action="{{ route('profile.phone.update') }}" class="space-y-4">
+                @csrf
+                @method('PUT')
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Nomor HP Baru</label>
+                    <input type="text" name="phone_number" value="{{ old('phone_number', $user->phone_number) }}"
+                        required
+                        class="w-full rounded-xl border-slate-200 px-3.5 py-2.5 text-sm focus:border-indigo-400 focus:ring-indigo-400">
+                    @error('phone_number')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div x-data="{ show: false }" class="relative">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Password Saat Ini</label>
+                    <div class="relative">
+                        <input :type="show ? 'text' : 'password'" name="current_password" required
+                            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 pr-11 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <button type="button" @click="show = !show"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600">
+                            <i class="ti" :class="show ? 'ti-eye-off' : 'ti-eye'"></i>
+                        </button>
+                    </div>
+                    @error('current_password')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit"
+                        class="rounded-xl bg-indigo-600 text-white text-sm font-medium px-5 py-2.5 hover:bg-indigo-700 transition">
+                        Ganti Nomor HP
+                    </button>
+                </div>
+            </form>
+        </div>
+
         {{-- Ganti Password --}}
         <div class="bg-white rounded-2xl shadow-sm p-6">
             <h2 class="text-sm font-semibold text-slate-800 mb-4">Ganti Password</h2>

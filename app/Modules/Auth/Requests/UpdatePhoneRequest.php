@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Auth\Requests\Concerns\NormalizesPhoneNumber;
 
-class UpdateUserRequest extends FormRequest
+class UpdatePhoneRequest extends FormRequest
 {
     use NormalizesPhoneNumber;
 
@@ -24,24 +24,17 @@ class UpdateUserRequest extends FormRequest
 
     public function rules(): array
     {
-        $userId = $this->route('user')->id;
-
         return [
-            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
-            'phone_number' => ['required', 'string', Rule::unique('users', 'phone_number')->ignore($userId)],
-            'password' => ['nullable', 'string', 'min:8'],
-            'is_active' => ['nullable', 'boolean'],
-            'roles' => ['nullable', 'array'],
-            'roles.*' => ['string', Rule::exists('roles', 'name')],
+            'current_password' => ['required', 'current_password'],
+            'phone_number' => ['required', 'string', Rule::unique('users', 'phone_number')->ignore($this->user()->id)],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'phone_number.required' => 'Nomor HP wajib diisi.',
+            'current_password.current_password' => 'Password yang kamu masukkan salah.',
             'phone_number.unique' => 'Nomor HP ini sudah dipakai user lain.',
-            'email.unique' => 'Email ini sudah dipakai user lain.',
         ];
     }
 }
