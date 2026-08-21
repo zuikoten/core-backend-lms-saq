@@ -18,7 +18,7 @@ class ParentStudentSeeder extends Seeder
             [
                 'father_name' => 'Budi Santoso',
                 'mother_name' => 'Siti Rahayu',
-                'phone_number' => '081234567890',
+                'phone_number' => '08985235880',
                 'address' => 'Jl. Merdeka No. 123, Jakarta',
             ],
             [

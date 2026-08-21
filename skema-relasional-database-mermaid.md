@@ -27,7 +27,7 @@ erDiagram
         bigint user_id FK "nullable"
         string phone_number "nullable"
         string otp_code
-        string action_type "login | activation | reset_password"
+        string action_type "login | activation | reset_password | change_phone"
         timestamp expires_at
         boolean is_used
         int attempts

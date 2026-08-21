@@ -60,10 +60,7 @@ Route::post('forgot-password/otp/new-password', [StaffPasswordResetController::c
 // permission ini (superadmin otomatis lolos lewat Gate::before bypass,
 // lihat AuthModuleServiceProvider::registerGates()), bukan role tertentu.
 Route::middleware(['auth:web', 'permission:panel.access', \Modules\Auth\Middleware\EnsureUserIsActive::class])->group(function () {
-    Route::get('staff/dashboard', function () {
-        return view('modules.auth.dashboard');
-    })->name('staff.dashboard');
-
+    
     Route::post('staff/logout', [AuthController::class, 'logout'])->name('staff.logout');
 
     // Profile management (self-service)
