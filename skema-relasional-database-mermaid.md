@@ -31,6 +31,8 @@ erDiagram
         timestamp expires_at
         boolean is_used
         int attempts
+        string gateway_message_id "nullable"
+        string delivery_status "nullable"
         datetime created_at
         datetime updated_at
     }

@@ -20,6 +20,8 @@ return new class extends Migration
             $table->timestamp('expires_at');
             $table->boolean('is_used')->default(false);
             $table->unsignedTinyInteger('attempts')->default(0);
+            $table->string('gateway_message_id')->nullable(); // id dari provider, buat korelasi webhook
+            $table->string('delivery_status')->nullable();     // sent|invalid|pending|expired|unknown, diupdate webhook
             $table->timestamps();
 
             $table->index(['user_id', 'created_at']);

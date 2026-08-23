@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Modules\Auth\Controllers\ParentAuthController;
 use Modules\Auth\Middleware\EnsureUserIsActive;
 use Modules\Auth\Controllers\ParentProfileApiController;
+use Modules\Auth\Controllers\OtpDeliveryStatusApiController;
+use Modules\Auth\Controllers\WhatsappWebhookController;
 
 Route::prefix('auth')->group(function () {
     Route::post('otp/request', [ParentAuthController::class, 'requestOtp'])
@@ -38,3 +40,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])
         Route::post('phone/otp/confirm', [ParentProfileApiController::class, 'confirmPhoneChange'])
             ->middleware('throttle:login');
     });
+
+Route::get('otp/delivery-status', [OtpDeliveryStatusApiController::class, 'show']);
+Route::post('webhooks/whatsapp/status', [WhatsappWebhookController::class, 'handleStatusUpdate']);
+

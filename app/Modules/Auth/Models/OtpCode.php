@@ -14,6 +14,8 @@ class OtpCode extends Model
         'otp_code',
         'action_type',
         'expires_at',
+        'gateway_message_id',
+        'delivery_status',
         'is_used',
     ];
 

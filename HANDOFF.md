@@ -97,6 +97,28 @@ detail teknisnya.
   jalur ganti email/password reguler yang minta konfirmasi password lama).
   Sebelumnya bisa overwrite kredensial diam-diam tanpa bukti kepemilikan.
 
+**Ganti nomor HP parent — diperkuat lebih lanjut (dual-path + revoke sesi):**
+- **Bug nyata ditemukan & diperbaiki**: `GenerateOtpAction` awalnya kirim
+  OTP ke `$user->phone_number` (nomor LAMA) alih-alih `$phoneNumber` param
+  (nomor BARU) — baru ketauan pas testing manual `change_phone`, karena
+  itu satu-satunya kasus di mana nomor tujuan beda dari nomor tersimpan di
+  `$user`. Fix: notifiable SELALU dituju ke `$phoneNumber` param, gak lagi
+  `$user ?? new class(...)`.
+- **Dual-path konfirmasi** (`RequestPhoneChangeOtpRequest`): parent yang
+  sudah `setCredentials()` wajib `current_password` dulu sebelum minta OTP
+  ke nomor baru (`required`); parent OTP-only field itu `prohibited`
+  (gak boleh diisi sama sekali) — supaya parent yang nomor lamanya udah
+  hilang/mati (skenario paling umum orang butuh fitur ini) tetap bisa
+  pakai, gak kejebak jalan buntu wajib verifikasi nomor lama dulu (riset
+  "dual-OTP" yang sempat diusulkan, sengaja TIDAK diadopsi mentah karena
+  gak cocok konteks project kecil ini).
+- **Revoke sesi/token lain** setelah sukses ganti nomor
+  (`ConfirmParentPhoneChangeAction`) — device lain langsung ke-logout,
+  kecuali device yang dipakai konfirmasi. Versi minimal sebelum fitur
+  "Manajemen sesi/perangkat aktif" penuh dibangun.
+- Cooldown 24 jam setelah sukses ganti — **sengaja di-skip**, bukan
+  prioritas sekarang.
+
 **Bug & celah desain yang tercatat, status per sesi ini:**
 - ~~Request OTP aktivasi parent tidak validasi keberadaan data `parents`
   dulu~~ — **sudah diperbaiki** (`Rule::exists('parents','phone_number')
@@ -111,6 +133,12 @@ detail teknisnya.
   yang provider-nya juga `users`.
 - ~~`SetParentCredentialsAction` bisa overwrite kredensial tanpa bukti
   kepemilikan~~ — **sudah diperbaiki**, lihat poin di atas.
+- ~~`GenerateOtpAction` kirim OTP `change_phone` ke nomor lama, bukan nomor
+  baru~~ — **sudah diperbaiki**, lihat poin "Ganti nomor HP parent" di
+  atas. Ada 2 baris Role `parent` sempat ketemu di database (`id 5` guard
+  `web`, `id 6` guard `sanctum`) — peninggalan sebelum bug guard
+  `assignRole` diperbaiki, sudah dihapus salah satunya, TAPI **cek ulang
+  manual** jangan sampai ada user yang masih nyangkut ke baris yang salah.
 - **Belum diperbaiki**: `ActivateParentAccountAction` commit transaksi
   (bikin user, link parent, assign role) **sebelum** controller bikin
   token Sanctum secara terpisah di luar transaksi itu — kalau pembuatan
@@ -118,6 +146,39 @@ detail teknisnya.
   tidak bisa aktivasi ulang (stuck). Perbaikan diusulkan (perluas
   transaksi mencakup `createToken`) tapi menunggu konfirmasi pemilik
   project sebelum dieksekusi.
+
+**Fitur baru: status pengiriman WhatsApp (delivery status), belum
+selesai diverifikasi end-to-end:**
+- `WhatsappGatewayInterface` diperluas — `send()` sekarang balikin DTO
+  `WhatsappSendResult` (bukan `bool` polos, biar `messageId` provider bisa
+  disimpan buat korelasi webhook), tambah method baru
+  `parseStatusWebhook(array $payload): WhatsappDeliveryStatus`.
+- 3 DTO/enum baru: `WhatsappSendResult`, `WhatsappDeliveryState` (`sent`|
+  `invalid`|`pending`|`expired`|`unknown`), `WhatsappDeliveryStatus`.
+- `FonnteWhatsappGateway` — **ganti nama** dari `PenyediaLayananWhatsappGateway`
+  (sekarang isinya spesifik ke bentuk payload Fonnte, gak lagi generic).
+- `otp_codes` — 2 kolom baru: `gateway_message_id` (buat korelasi),
+  `delivery_status` (diupdate webhook).
+- `WhatsappWebhookController` (`POST /api/webhooks/whatsapp/status`,
+  diamankan `?token=` di query string — **sengaja hardcode di controller,
+  BUKAN bagian `WhatsappGatewayInterface`**, dicatat sebagai utang
+  adaptabilitas yang disengaja karena baru ada 1 provider buat acuan
+  bentuknya) + `OtpDeliveryStatusApiController` (`GET /api/otp/delivery-status`,
+  publik, buat React polling).
+- **3 pekerjaan manual yang masih tertunda** (di luar jangkauan Claude):
+  binding `AuthModuleServiceProvider` belum dipindah ke
+  `FonnteWhatsappGateway`, `OtpCode` Model `$fillable` belum ditambah 2
+  kolom baru, file lama `PenyediaLayananWhatsappGateway.php` belum
+  dihapus.
+- **Testing**: alur inti (kirim OTP, dst) sudah kebukti jalan lewat
+  `127.0.0.1` — TIDAK butuh domain publik sama sekali (itu cuma jalur
+  outbound). Verifikasi `delivery_status` **belum selesai** — butuh
+  domain publik (Fonnte manggil BALIK ke sistem kita, jalur inbound).
+  Sempat coba `loca.lt` (localtunnel), ketauan gak reliable (halaman
+  interstisial buat pengunjung baru + koneksi suka putus sendiri),
+  direkomendasikan pindah ke `cloudflared tunnel --url http://localhost:8000`
+  (gak ada interstisial di free tier-nya) — belum dikonfirmasi hasil
+  akhirnya oleh pemilik project.
 
 ### Core — CRUD lengkap, permission `core.manage`
 5 entitas: **AcademicYear** (tahun ajaran, 1 aktif di seluruh sistem),
@@ -321,6 +382,27 @@ pola baru tanpa didiskusikan dulu:
 - **Menghitung ulang status/nominal turunan (mis. status invoice) dari data
   transaksi asli**, bukan disimpan & di-update manual — supaya tidak ada
   celah tidak sinkron (lihat `RecalculateInvoiceStatusAction` di Finance).
+- **Gateway pihak ketiga (WA, dan pola serupa kalau nanti ada SMS/email
+  transactional/payment gateway lain) dibungkus interface + DTO/enum
+  seragam**, BUKAN `bool`/array asosiatif mentah — supaya ganti provider
+  idealnya cukup 1 file class baru + 1 baris binding di Provider, tanpa
+  nyentuh kode pemanggil. Lihat `WhatsappGatewayInterface`
+  (`send()`→`WhatsappSendResult`, `parseStatusWebhook()`→`WhatsappDeliveryStatus`)
+  di modul Auth sebagai contoh konkret. **Batasannya**: adaptasi ini cuma
+  menjangkau bagian yang SUDAH dilewati lebih dari 1 provider secara
+  konsep (kirim pesan, parsing status) — bagian yang baru ada 1 acuan
+  (mis. cara verifikasi keamanan webhook masuk) boleh sementara di-hardcode
+  di controller, didokumentasikan eksplisit sebagai utang, BUKAN
+  dipaksa digeneralisasi dari awal tanpa acuan pembanding nyata.
+- **Testing webhook (request masuk dari pihak ketiga) butuh domain publik**
+  — `127.0.0.1`/`localhost` cuma bisa diakses dari mesin sendiri, gak bisa
+  dijangkau server luar buat callback. Kirim/outbound (Laravel manggil
+  keluar) selalu bisa dites langsung dari `127.0.0.1` tanpa tunnel apa
+  pun. Buat tunnel gratis yang dipakai testing sementara, **`cloudflared`
+  lebih reliable dibanding `loca.lt`** (localtunnel) — `loca.lt` ketahuan
+  punya halaman interstisial buat pengunjung IP baru (berisiko nyandung
+  request dari server pihak ketiga, keliru dibalikin HTML alih-alih
+  diterusin) dan koneksinya sempat putus sendiri saat testing.
 
 ---
 

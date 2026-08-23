@@ -34,11 +34,13 @@ class GenerateOtpAction
             'is_used' => false,
         ]);
 
-        // Notifiable sederhana: cukup User (kalau ada) atau objek anonim
-        // dengan routeNotificationFor('whatsapp') mengarah ke $phoneNumber.
+        // Notifiable SELALU dituju ke $phoneNumber param, BUKAN $user langsung --
+        // $user->phone_number yang tersimpan di database bisa beda dari nomor
+        // tujuan OTP kali ini (kasus change_phone: OTP wajib ke nomor BARU, bukan
+        // nomor lama yang masih tersimpan di $user sampai proses ini selesai).
         // WAJIB pakai trait Notifiable, bukan cuma routeNotificationFor() --
         // method notify() itu asalnya dari trait ini, bukan method biasa.
-        $notifiable = $user ?? new class($phoneNumber)
+        $notifiable = new class($phoneNumber)
         {
             use \Illuminate\Notifications\Notifiable;
 
@@ -50,7 +52,14 @@ class GenerateOtpAction
             }
         };
 
-        $notifiable->notify(new SendOtpWhatsappNotification($plainOtp));
+        $notifiable->notify(new SendOtpWhatsappNotification(
+            otpCode: $plainOtp,
+            onSent: function (\Modules\Auth\Notifications\Contracts\WhatsappSendResult $result) use ($otp) {
+                if ($result->messageId) {
+                    $otp->update(['gateway_message_id' => $result->messageId]);
+                }
+            },
+        ));
 
         return $otp;
     }

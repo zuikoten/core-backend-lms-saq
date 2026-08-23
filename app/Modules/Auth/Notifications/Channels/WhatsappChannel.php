@@ -18,7 +18,10 @@ class WhatsappChannel
         }
 
         $data = $notification->toWhatsapp($notifiable);
+        $result = $this->gateway->send($data['phone_number'], $data['message']);
 
-        $this->gateway->send($data['phone_number'], $data['message']);
+        if (isset($data['on_sent']) && is_callable($data['on_sent'])) {
+            ($data['on_sent'])($result);
+        }
     }
 }
