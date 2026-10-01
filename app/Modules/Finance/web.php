@@ -60,7 +60,7 @@ Route::middleware(['auth:web', 'permission:finance.manage', EnsureUserIsActive::
                 Route::delete('{studentTariffMapping}', [StudentTariffMappingController::class, 'destroy'])->name('destroy');
             });
 
-            Route::prefix('invoices')
+        Route::prefix('invoices')
             ->name('invoices.')
             ->group(function () {
                 Route::get('/', [InvoiceController::class, 'index'])->name('index');
@@ -73,9 +73,11 @@ Route::middleware(['auth:web', 'permission:finance.manage', EnsureUserIsActive::
                 Route::delete('{invoice}', [InvoiceController::class, 'destroy'])->name('destroy');
                 Route::post('{invoice}/items', [InvoiceController::class, 'storeItem'])->name('items.store');
                 Route::delete('{invoice}/items/{item}', [InvoiceController::class, 'destroyItem'])->name('items.destroy');
+                Route::post('{invoice}/payments', [InvoiceController::class, 'storePayment'])->name('payments.store');
+                Route::delete('{invoice}/payments/{payment}', [InvoiceController::class, 'destroyPayment'])->name('payments.destroy');
             });
 
-            Route::prefix('reports')
+        Route::prefix('reports')
             ->name('reports.')
             ->group(function () {
                 Route::get('/', [FinancialReportController::class, 'index'])->name('index');

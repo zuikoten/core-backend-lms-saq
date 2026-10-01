@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('invoice_id')->constrained()->restrictOnDelete();
             $table->foreignId('payment_channel_id')->nullable()->constrained()->restrictOnDelete();
-            $table->string('gateway_reference_id')->unique(); // referensi yang kita generate & kirim ke Finpay
-            $table->string('gateway_trx_id')->nullable(); // ID/kode dari Finpay (paymentCode / trxId)
+            $table->string('external_id')->unique(); // yang KITA generate & kirim ke Xendit
+            // (rename dari gateway_reference_id)
+            $table->string('gateway_trx_id')->nullable(); // `id` invoice dari respons Xendit
+            $table->text('invoice_url')->nullable(); // NEW — link checkout dari Xendit,
+            // ini yang dikirim/ditampilkan ke orang tua
             $table->enum('status', ['pending', 'paid', 'expired', 'failed', 'cancelled'])->default('pending');
             $table->decimal('amount', 12, 2);
             $table->timestamp('expired_at')->nullable();

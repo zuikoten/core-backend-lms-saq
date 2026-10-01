@@ -11,9 +11,9 @@ class PaymentGatewayTransaction extends Model
     protected $fillable = [
         'invoice_id',
         'payment_channel_id',
-        'gateway_reference_id',
+        'external_id',
         'gateway_trx_id',
-        'channel_data',
+        'invoice_url',
         'status',
         'amount',
         'expired_at',

@@ -13,14 +13,19 @@ use Modules\Finance\Actions\DeleteInvoiceAction;
 use Modules\Finance\Actions\DeleteInvoiceItemAction;
 use Modules\Finance\Actions\FindStudentsForInvoiceGenerationAction;
 use Modules\Finance\Actions\GenerateMonthlyInvoicesAction;
+use Modules\Finance\Actions\CreateInvoicePaymentAction;
+use Modules\Finance\Actions\DeleteInvoicePaymentAction;
 use Modules\Finance\Models\BillingTariff;
 use Modules\Finance\Models\BillingType;
 use Modules\Finance\Models\Invoice;
 use Modules\Finance\Models\InvoiceItem;
+use Modules\Finance\Models\InvoicePayment;
+use Modules\Finance\Models\PaymentChannel;
 use Modules\Finance\Requests\EligibleStudentsForInvoiceRequest;
 use Modules\Finance\Requests\StoreBulkInvoiceRequest;
 use Modules\Finance\Requests\StoreInvoiceItemRequest;
 use Modules\Finance\Requests\StoreManualInvoiceRequest;
+use Modules\Finance\Requests\StoreInvoicePaymentRequest;
 use Modules\Student\Models\Student;
 
 class InvoiceController extends Controller
@@ -37,10 +42,14 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice): View
     {
-        $invoice->load(['student', 'academicYear', 'createdBy', 'items.billingType']);
+        $invoice->load(['student', 'academicYear', 'createdBy', 'items.billingType', 'payments.paymentChannel', 'payments.handoverBy']);
         $billingTypes = BillingType::query()->orderBy('name')->get();
+        $paymentChannels = PaymentChannel::query()->where('is_active', true)->orderBy('name')->get();
 
-        return view('modules.finance.invoices.show', compact('invoice', 'billingTypes'));
+        $totalPaid = $invoice->payments->sum('amount_paid');
+        $remaining = $invoice->total_amount - $totalPaid;
+
+        return view('modules.finance.invoices.show', compact('invoice', 'billingTypes', 'paymentChannels', 'totalPaid', 'remaining'));
     }
 
     public function bulkCreate(): View
@@ -116,5 +125,19 @@ class InvoiceController extends Controller
         $action->execute($item);
 
         return redirect()->route('finance.invoices.show', $invoice)->with('status', 'Item berhasil dihapus.');
+    }
+
+        public function storePayment(StoreInvoicePaymentRequest $request, Invoice $invoice, CreateInvoicePaymentAction $action): RedirectResponse
+    {
+        $action->execute($invoice, $request->validated());
+
+        return redirect()->route('finance.invoices.show', $invoice)->with('status', 'Pembayaran berhasil dicatat.');
+    }
+
+    public function destroyPayment(Invoice $invoice, InvoicePayment $payment, DeleteInvoicePaymentAction $action): RedirectResponse
+    {
+        $action->execute($payment);
+
+        return redirect()->route('finance.invoices.show', $invoice)->with('status', 'Pembayaran berhasil dihapus.');
     }
 }
