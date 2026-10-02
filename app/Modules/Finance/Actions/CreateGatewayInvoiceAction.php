@@ -41,12 +41,12 @@ class CreateGatewayInvoiceAction
             + DB::table('payment_gateway_transactions')->where('invoice_id', $invoice->id)->where('status', 'paid')->sum('amount');
         $sisaTagihan = $invoice->total_amount - $totalPaid;
 
-        $externalId = 'INV-'.$invoice->id.'-'.now()->timestamp;
+        $externalId = 'INV-' . $invoice->id . '-' . now()->timestamp;
 
         $result = $this->gateway->createInvoice(
             externalId: $externalId,
             amount: $sisaTagihan,
-            payerEmail: $invoice->student->parentProfile->user->email,
+            payerEmail: $invoice->student->parentProfile->user->email, // boleh null
             description: "Pembayaran {$invoice->invoice_number}",
             durationSeconds: 86400,
         );

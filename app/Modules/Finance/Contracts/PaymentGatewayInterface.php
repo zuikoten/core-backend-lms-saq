@@ -7,7 +7,7 @@ interface PaymentGatewayInterface
     public function createInvoice(
         string $externalId,
         float $amount,
-        string $payerEmail,
+        ?string $payerEmail,  // <- nullable
         string $description,
         int $durationSeconds,
     ): PaymentGatewayInvoiceResult;

@@ -13,19 +13,19 @@ class XenditPaymentGateway implements PaymentGatewayInterface
     public function createInvoice(
         string $externalId,
         float $amount,
-        string $payerEmail,
+        ?string $payerEmail,
         string $description,
         int $durationSeconds,
     ): PaymentGatewayInvoiceResult {
         $response = Http::withBasicAuth(config('services.xendit.secret_key'), '')
-            ->post('https://api.xendit.co/v2/invoices', [
+            ->post('https://api.xendit.co/v2/invoices', array_filter([
                 'external_id' => $externalId,
                 'amount' => $amount,
                 'payer_email' => $payerEmail,
                 'description' => $description,
                 'invoice_duration' => $durationSeconds,
                 'currency' => 'IDR',
-            ])
+            ], fn($value) => $value !== null))
             ->throw()
             ->json();
 
