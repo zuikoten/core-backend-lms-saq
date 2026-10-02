@@ -1,0 +1,41 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-CgyycriY.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-B2Lf2PD2.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/modules/auth/otp-input.js": {
+    "file": "assets/otp-input-DPX3v30D.js",
+    "name": "otp-input",
+    "src": "resources/js/modules/auth/otp-input.js",
+    "isEntry": true
+  },
+  "resources/js/modules/finance/invoice-bulk-create.js": {
+    "file": "assets/invoice-bulk-create-Bk61N4od.js",
+    "name": "invoice-bulk-create",
+    "src": "resources/js/modules/finance/invoice-bulk-create.js",
+    "isEntry": true
+  },
+  "resources/js/modules/finance/invoice-manual-create.js": {
+    "file": "assets/invoice-manual-create-CrEI6U5C.js",
+    "name": "invoice-manual-create",
+    "src": "resources/js/modules/finance/invoice-manual-create.js",
+    "isEntry": true
+  },
+  "resources/js/modules/finance/student-tariff-mapping-bulk-create.js": {
+    "file": "assets/student-tariff-mapping-bulk-create-BCBjDmRf.js",
+    "name": "student-tariff-mapping-bulk-create",
+    "src": "resources/js/modules/finance/student-tariff-mapping-bulk-create.js",
+    "isEntry": true
+  }
+}
