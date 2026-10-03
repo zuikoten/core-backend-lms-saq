@@ -48,7 +48,7 @@ class CreateGatewayInvoiceAction
             amount: $sisaTagihan,
             payerEmail: $invoice->student->parentProfile->user->email, // boleh null
             description: "Pembayaran {$invoice->invoice_number}",
-            durationSeconds: 86400,
+            durationSeconds: 60,
         );
 
         return PaymentGatewayTransaction::create([
