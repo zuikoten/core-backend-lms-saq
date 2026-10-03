@@ -34,7 +34,10 @@ class HandleGatewayWebhookAction
                     'payment_channel_id' => $transaction->payment_channel_id,
                     'reference_number' => $transaction->gateway_trx_id,
                     'amount_paid' => $transaction->amount,
-                    'paid_at' => now(),
+                    // Waktu ASLI dari Xendit, bukan now() — now() cuma menunjukkan
+                    // kapan WEBHOOK diproses, bisa telat dari kejadian bayar
+                    // sebenarnya kalau ada retry/downtime/resend manual.
+                    'paid_at' => $result->paidAt ?? now(),
                     'handover_by' => null,
                     'payment_gateway_transaction_id' => $transaction->id,
                 ]);
@@ -42,7 +45,7 @@ class HandleGatewayWebhookAction
 
             $transaction->update([
                 'status' => $result->status->value,
-                'paid_at' => $result->status === PaymentGatewayStatus::Paid ? now() : null,
+                'paid_at' => $result->status === PaymentGatewayStatus::Paid ? ($result->paidAt ?? now()) : null,
                 'raw_response' => $result->rawPayload,
             ]);
         });

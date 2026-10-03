@@ -53,6 +53,7 @@ class XenditPaymentGateway implements PaymentGatewayInterface
         return new PaymentGatewayWebhookResult(
             externalId: $payload['external_id'],
             status: $status,
+            paidAt: isset($payload['paid_at']) ? new \DateTimeImmutable($payload['paid_at']) : null,
             rawPayload: $payload,
         );
     }
