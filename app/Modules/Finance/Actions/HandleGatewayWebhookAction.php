@@ -14,11 +14,6 @@ class HandleGatewayWebhookAction
         private CreateInvoicePaymentAction $createInvoicePayment,
     ) {}
 
-    /**
-     * Idempotent sengaja: gateway retry webhook kalau respons kita
-     * telat/gagal, jadi transaksi yang statusnya sudah final (paid/expired/
-     * cancelled) tidak diproses dobel — mencegah InvoicePayment ganda.
-     */
     public function execute(array $payload): void
     {
         $result = $this->gateway->parseInvoiceWebhook($payload);
@@ -30,16 +25,11 @@ class HandleGatewayWebhookAction
         }
 
         DB::transaction(function () use ($transaction, $result) {
-            $transaction->update([
-                'status' => $result->status->value,
-                'paid_at' => $result->status === PaymentGatewayStatus::Paid ? now() : null,
-                'raw_response' => $result->rawPayload,
-            ]);
-
+            // Catat ke invoice_payments DULU, sebelum transaksi gateway
+            // ditandai 'paid' — supaya CreateInvoicePaymentAction menghitung
+            // sisa tagihan dari invoice_payments yang masih "bersih" (belum
+            // ketambah transaksi ini dari sisi manapun).
             if ($result->status === PaymentGatewayStatus::Paid) {
-                // handover_by null: tidak ada staf yang input, ini otomatis
-                // dari gateway — pembeda "berasal dari gateway" tetap lewat
-                // payment_gateway_transaction_id, bukan handover_by.
                 $this->createInvoicePayment->execute($transaction->invoice, [
                     'payment_channel_id' => $transaction->payment_channel_id,
                     'reference_number' => $transaction->gateway_trx_id,
@@ -49,6 +39,12 @@ class HandleGatewayWebhookAction
                     'payment_gateway_transaction_id' => $transaction->id,
                 ]);
             }
+
+            $transaction->update([
+                'status' => $result->status->value,
+                'paid_at' => $result->status === PaymentGatewayStatus::Paid ? now() : null,
+                'raw_response' => $result->rawPayload,
+            ]);
         });
     }
 }

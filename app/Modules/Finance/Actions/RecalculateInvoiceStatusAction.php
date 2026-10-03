@@ -8,10 +8,12 @@ use Modules\Finance\Models\Invoice;
 class RecalculateInvoiceStatusAction
 {
     /**
-     * Status invoice dihitung ulang dari total pembayaran yang benar-benar
-     * masuk (manual lewat invoice_payments + gateway yang statusnya 'paid'),
-     * bukan disimpan manual — supaya tidak ada celah status tidak sinkron
-     * dengan nominal yang sebenarnya sudah dibayar.
+     * Status invoice dihitung ulang HANYA dari invoice_payments — satu-satunya
+     * sumber kebenaran nominal yang sudah dibayar, baik manual maupun gateway
+     * (gateway dicerminkan ke sini lewat HandleGatewayWebhookAction).
+     * payment_gateway_transactions sengaja tidak ikut dihitung di sini: itu
+     * cuma arsip/jejak proses pembayaran gateway, bukan catatan uang masuk —
+     * ikut dihitung akan menyebabkan pembayaran yang sama kehitung dobel.
      */
     public function execute(Invoice $invoice): Invoice
     {
@@ -19,8 +21,7 @@ class RecalculateInvoiceStatusAction
             return $invoice;
         }
 
-        $totalPaid = DB::table('invoice_payments')->where('invoice_id', $invoice->id)->sum('amount_paid')
-            + DB::table('payment_gateway_transactions')->where('invoice_id', $invoice->id)->where('status', 'paid')->sum('amount');
+        $totalPaid = DB::table('invoice_payments')->where('invoice_id', $invoice->id)->sum('amount_paid');
 
         $status = match (true) {
             $totalPaid <= 0 => 'unpaid',

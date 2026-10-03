@@ -21,8 +21,12 @@ class CreateInvoicePaymentAction
             ]);
         }
 
-        $totalPaid = DB::table('invoice_payments')->where('invoice_id', $invoice->id)->sum('amount_paid')
-            + DB::table('payment_gateway_transactions')->where('invoice_id', $invoice->id)->where('status', 'paid')->sum('amount');
+        // invoice_payments adalah SATU-SATUNYA sumber kebenaran nominal yang
+        // sudah dibayar — termasuk pembayaran dari gateway, karena setiap
+        // transaksi gateway yang sukses selalu dicerminkan jadi 1 baris di
+        // sini juga (lihat HandleGatewayWebhookAction). payment_gateway_transactions
+        // sengaja TIDAK ikut dijumlah di sini, biar tidak dihitung dobel.
+        $totalPaid = DB::table('invoice_payments')->where('invoice_id', $invoice->id)->sum('amount_paid');
 
         $remaining = $invoice->total_amount - $totalPaid;
 
