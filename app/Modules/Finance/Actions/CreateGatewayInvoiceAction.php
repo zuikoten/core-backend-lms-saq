@@ -13,11 +13,6 @@ class CreateGatewayInvoiceAction
 {
     public function __construct(private PaymentGatewayInterface $gateway) {}
 
-    /**
-     * external_id disertakan timestamp (bukan invoice_number polos) supaya
-     * orang tua bisa generate link baru kalau link sebelumnya sudah expired
-     * — Xendit menolak external_id yang dipakai ulang.
-     */
     public function execute(Invoice $invoice): PaymentGatewayTransaction
     {
         if ($invoice->status === 'cancelled') {
@@ -32,21 +27,34 @@ class CreateGatewayInvoiceAction
             ]);
         }
 
+        // Kalau masih ada transaksi gateway yang 'pending' dan belum expired
+        // untuk invoice yang sama, pakai ulang link itu — JANGAN bikin baru.
+        // Ini yang mencegah 2 metode bayar aktif bersamaan untuk 1 invoice,
+        // yang kalau dibiarkan bisa berujung dibayar 2x (kasus Mizan 2).
+        $existing = PaymentGatewayTransaction::where('invoice_id', $invoice->id)
+            ->where('status', 'pending')
+            ->where('expired_at', '>', now())
+            ->latest('id')
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
         $channel = PaymentChannel::query()
             ->where('channel_type', 'gateway')
             ->where('is_active', true)
             ->firstOrFail();
 
-        $totalPaid = DB::table('invoice_payments')->where('invoice_id', $invoice->id)->sum('amount_paid')
-            + DB::table('payment_gateway_transactions')->where('invoice_id', $invoice->id)->where('status', 'paid')->sum('amount');
+        $totalPaid = DB::table('invoice_payments')->where('invoice_id', $invoice->id)->sum('amount_paid');
         $sisaTagihan = $invoice->total_amount - $totalPaid;
 
-        $externalId = 'INV-' . $invoice->id . '-' . now()->timestamp;
+        $externalId = 'INV-'.$invoice->id.'-'.now()->timestamp;
 
         $result = $this->gateway->createInvoice(
             externalId: $externalId,
             amount: $sisaTagihan,
-            payerEmail: $invoice->student->parentProfile->user->email, // boleh null
+            payerEmail: $invoice->student->parentProfile->user->email,
             description: "Pembayaran {$invoice->invoice_number}",
             durationSeconds: 86400,
         );

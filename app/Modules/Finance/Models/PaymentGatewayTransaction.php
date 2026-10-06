@@ -15,6 +15,7 @@ class PaymentGatewayTransaction extends Model
         'gateway_trx_id',
         'invoice_url',
         'status',
+        'is_overpayment',
         'amount',
         'expired_at',
         'paid_at',

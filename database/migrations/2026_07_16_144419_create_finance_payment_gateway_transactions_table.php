@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('invoice_url')->nullable(); // NEW — link checkout dari Xendit,
             // ini yang dikirim/ditampilkan ke orang tua
             $table->enum('status', ['pending', 'paid', 'expired', 'failed', 'cancelled'])->default('pending');
+            $table->boolean('is_overpayment')->default(false);
             $table->decimal('amount', 12, 2);
             $table->timestamp('expired_at')->nullable();
             $table->timestamp('paid_at')->nullable();

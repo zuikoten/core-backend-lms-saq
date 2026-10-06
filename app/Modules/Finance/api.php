@@ -15,6 +15,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])
         Route::get('summary', [InvoiceApiController::class, 'summary']);
         Route::get('/', [InvoiceApiController::class, 'index']);
         Route::get('{invoice}', [InvoiceApiController::class, 'show']);
-        Route::post('{invoice}/checkout', [InvoiceCheckoutApiController::class, 'store']);
+        Route::post('{invoice}/checkout', [InvoiceCheckoutApiController::class, 'store'])
+            ->middleware('throttle:6,1'); // maksimal 6 request/menit per user
     });
 Route::post('webhooks/xendit/invoice', [XenditWebhookController::class, 'store']);
