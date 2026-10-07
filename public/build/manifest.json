@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-CgyycriY.css",
+    "file": "assets/app-3qGKfQIu.css",
     "name": "app",
     "names": [
       "app.css"
@@ -12,6 +12,12 @@
     "file": "assets/app-B2Lf2PD2.js",
     "name": "app",
     "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/modules/academic/class-group-students.js": {
+    "file": "assets/class-group-students-BIGyGFnQ.js",
+    "name": "class-group-students",
+    "src": "resources/js/modules/academic/class-group-students.js",
     "isEntry": true
   },
   "resources/js/modules/auth/otp-input.js": {
