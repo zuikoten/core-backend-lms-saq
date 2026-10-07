@@ -13,33 +13,46 @@ class CreateInvoicePaymentAction
         private RecalculateInvoiceStatusAction $recalculateInvoiceStatus,
     ) {}
 
+    /**
+     * Seluruh proses dibungkus transaction + lock pada baris invoice, supaya
+     * pencatatan manual oleh staf yang kebetulan bersamaan dengan webhook
+     * gateway tidak sama-sama lolos cek sisa tagihan. Lock aman dipanggil
+     * ulang kalau pemanggilnya (webhook) sudah mengunci baris yang sama di
+     * transaction yang sama.
+     */
     public function execute(Invoice $invoice, array $data): InvoicePayment
     {
-        if ($invoice->status === 'cancelled') {
-            throw ValidationException::withMessages([
-                'amount_paid' => 'Invoice ini sudah dibatalkan, tidak bisa menerima pembayaran.',
-            ]);
-        }
+        return DB::transaction(function () use ($invoice, $data) {
+            $invoice = Invoice::query()->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
 
-        // invoice_payments adalah SATU-SATUNYA sumber kebenaran nominal yang
-        // sudah dibayar — termasuk pembayaran dari gateway, karena setiap
-        // transaksi gateway yang sukses selalu dicerminkan jadi 1 baris di
-        // sini juga (lihat HandleGatewayWebhookAction). payment_gateway_transactions
-        // sengaja TIDAK ikut dijumlah di sini, biar tidak dihitung dobel.
-        $totalPaid = DB::table('invoice_payments')->where('invoice_id', $invoice->id)->sum('amount_paid');
+            if ($invoice->status === 'cancelled') {
+                throw ValidationException::withMessages([
+                    'amount_paid' => 'Invoice ini sudah dibatalkan, tidak bisa menerima pembayaran.',
+                ]);
+            }
 
-        $remaining = $invoice->total_amount - $totalPaid;
+            // invoice_payments adalah SATU-SATUNYA sumber kebenaran nominal yang
+            // sudah dibayar — termasuk pembayaran dari gateway, karena setiap
+            // transaksi gateway yang sukses selalu dicerminkan jadi 1 baris di
+            // sini juga (lihat HandleGatewayWebhookAction). payment_gateway_transactions
+            // sengaja TIDAK ikut dijumlah di sini, biar tidak dihitung dobel.
+            $totalPaid = (float) DB::table('invoice_payments')->where('invoice_id', $invoice->id)->sum('amount_paid');
 
-        if ($data['amount_paid'] > $remaining) {
-            throw ValidationException::withMessages([
-                'amount_paid' => 'Nominal melebihi sisa tagihan (Rp'.number_format($remaining, 0, ',', '.').'). Sesuaikan nominalnya.',
-            ]);
-        }
+            // Dibulatkan 2 desimal di kedua sisi supaya selisih floating point
+            // tidak memicu penolakan palsu "melebihi sisa tagihan".
+            $remaining = round((float) $invoice->total_amount - $totalPaid, 2);
 
-        $payment = $invoice->payments()->create($data);
+            if (round((float) $data['amount_paid'], 2) > $remaining) {
+                throw ValidationException::withMessages([
+                    'amount_paid' => 'Nominal melebihi sisa tagihan (Rp'.number_format($remaining, 0, ',', '.').'). Sesuaikan nominalnya.',
+                ]);
+            }
 
-        $this->recalculateInvoiceStatus->execute($invoice);
+            $payment = $invoice->payments()->create($data);
 
-        return $payment;
+            $this->recalculateInvoiceStatus->execute($invoice);
+
+            return $payment;
+        });
     }
 }

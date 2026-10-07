@@ -14,6 +14,8 @@ class StudentTariffMapping extends Model
         'billing_tariff_id',
         'academic_year_id',
         'billing_type_id',
+        'note',
+        'approved_by',
     ];
 
     public function student(): BelongsTo

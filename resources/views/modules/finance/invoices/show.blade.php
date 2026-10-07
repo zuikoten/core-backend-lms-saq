@@ -28,6 +28,38 @@
         <div class="rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ $errors->first() }}</div>
     @endif
 
+    @if ($overpaidTransactions->isNotEmpty())
+        <div class="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <p class="font-medium">Kelebihan bayar Rp{{ number_format($overpaidTransactions->sum('overpaid_amount'), 0, ',', '.') }} — perlu direfund atau dialihkan.</p>
+            <ul class="mt-1 space-y-0.5 text-xs">
+                @foreach ($overpaidTransactions as $transaction)
+                    <li>
+                        Lebih Rp{{ number_format($transaction->overpaid_amount, 0, ',', '.') }}
+                        dari pembayaran Rp{{ number_format($transaction->amount, 0, ',', '.') }}
+                        · {{ $transaction->paid_at?->translatedFormat('d M Y, H:i') }}
+                        · Ref: {{ $transaction->gateway_trx_id }}
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @php($gw = $latestGatewayTransaction)
+    @if ($gw && in_array($invoice->status, ['unpaid', 'partial']) && $gw->status !== 'paid')
+        @if ($gw->status === 'pending' && $gw->expired_at?->isFuture())
+            <div class="rounded-xl bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                Link pembayaran online aktif sampai {{ $gw->expired_at->translatedFormat('d M Y, H:i') }}
+                (Rp{{ number_format($gw->amount, 0, ',', '.') }}).
+            </div>
+        @elseif ($gw->status !== 'cancelled')
+            <div class="rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-600">
+                Link pembayaran online terakhir {{ $gw->status === 'failed' ? 'gagal' : 'kedaluwarsa' }}
+                @if ($gw->expired_at) ({{ $gw->expired_at->translatedFormat('d M Y, H:i') }}) @endif.
+                Orang tua perlu menekan "Bayar online" lagi di aplikasi untuk mendapatkan link baru.
+            </div>
+        @endif
+    @endif
+
     <div class="rounded-2xl bg-white p-6 shadow-sm">
         <div class="mb-4 grid grid-cols-2 gap-4 text-sm">
             <div>

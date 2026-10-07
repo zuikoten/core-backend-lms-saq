@@ -5,6 +5,7 @@ namespace Modules\Finance\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Core\Models\AcademicYear;
 use Modules\Finance\Actions\AddInvoiceItemAction;
@@ -30,12 +31,23 @@ use Modules\Student\Models\Student;
 
 class InvoiceController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $invoices = Invoice::query()
             ->with(['student', 'academicYear'])
+            // Total kelebihan bayar per invoice (untuk badge di daftar).
+            ->withSum(
+                ['gatewayTransactions as overpaid_total' => fn ($query) => $query->where('overpaid_amount', '>', 0)],
+                'overpaid_amount'
+            )
+            // ?kelebihan=1 → hanya invoice yang punya kelebihan bayar.
+            ->when(
+                $request->boolean('kelebihan'),
+                fn ($query) => $query->whereHas('gatewayTransactions', fn ($t) => $t->overpaid())
+            )
             ->latest('id')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         return view('modules.finance.invoices.index', compact('invoices'));
     }
@@ -49,7 +61,10 @@ class InvoiceController extends Controller
         $totalPaid = $invoice->payments->sum('amount_paid');
         $remaining = $invoice->total_amount - $totalPaid;
 
-        return view('modules.finance.invoices.show', compact('invoice', 'billingTypes', 'paymentChannels', 'totalPaid', 'remaining'));
+        $overpaidTransactions = $invoice->gatewayTransactions()->overpaid()->latest('id')->get();
+        $latestGatewayTransaction = $invoice->gatewayTransactions()->latest('id')->first();
+
+        return view('modules.finance.invoices.show', compact('invoice', 'billingTypes', 'paymentChannels', 'totalPaid', 'remaining', 'overpaidTransactions', 'latestGatewayTransaction'));
     }
 
     public function bulkCreate(): View
@@ -61,14 +76,18 @@ class InvoiceController extends Controller
 
     public function eligibleStudents(EligibleStudentsForInvoiceRequest $request, FindStudentsForInvoiceGenerationAction $action): JsonResponse
     {
-        $students = $action->execute(
+        $args = [
             $request->validated('academic_year_id'),
             $request->validated('period_month'),
             $request->validated('period_year'),
             $request->validated('class_group_id'),
-        );
+        ];
 
-        return response()->json(['students' => $students]);
+        return response()->json([
+            'students' => $action->execute(...$args),
+            // Siswa aktif yang TIDAK akan ikut digenerate karena belum punya tarif recurring.
+            'unmapped' => $action->withoutTariff(...$args),
+        ]);
     }
 
     public function bulkStore(StoreBulkInvoiceRequest $request, GenerateMonthlyInvoicesAction $action): RedirectResponse

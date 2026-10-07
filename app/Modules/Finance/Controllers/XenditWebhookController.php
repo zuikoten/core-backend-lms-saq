@@ -36,9 +36,19 @@ class XenditWebhookController extends Controller
             return response()->noContent(403);
         }
 
-        $action->execute($request->all());
+        // Kalau action melempar exception, log tetap processed=false dan
+        // Xendit akan retry (response 500) — memang itu yang diinginkan.
+        $transaction = $action->execute($request->all());
 
-        $log->update(['processed' => true]);
+        // Assign properti langsung (bukan update([...])) supaya tidak
+        // tergantung $fillable WebhookLog — kolom relasi ini tidak boleh
+        // hilang diam-diam seperti kasus note/approved_by di mapping.
+        $log->payment_gateway_transaction_id = $transaction?->id;
+        // processed=true hanya kalau callback berhasil dicocokkan ke transaksi;
+        // callback tak dikenal (mis. payload tes dari dashboard Xendit) tetap
+        // dijawab 200 supaya tidak di-retry, tapi ditandai belum diproses.
+        $log->processed = $transaction !== null;
+        $log->save();
 
         return response()->noContent();
     }

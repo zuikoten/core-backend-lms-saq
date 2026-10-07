@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +17,7 @@ class PaymentGatewayTransaction extends Model
         'invoice_url',
         'status',
         'is_overpayment',
+        'overpaid_amount',
         'amount',
         'expired_at',
         'paid_at',
@@ -26,13 +28,23 @@ class PaymentGatewayTransaction extends Model
     protected function casts(): array
     {
         return [
-            'channel_data' => 'array',
             'amount' => 'decimal:2',
+            'overpaid_amount' => 'decimal:2',
+            'is_overpayment' => 'boolean',
             'expired_at' => 'datetime',
             'paid_at' => 'datetime',
             'raw_request' => 'array',
             'raw_response' => 'array',
         ];
+    }
+
+    /**
+     * Transaksi yang menerima uang lebih dari yang dibutuhkan invoice
+     * (perlu direfund / dialihkan oleh bendahara).
+     */
+    public function scopeOverpaid(Builder $query): Builder
+    {
+        return $query->where('overpaid_amount', '>', 0);
     }
 
     public function invoice(): BelongsTo

@@ -22,6 +22,8 @@ return new class extends Migration
             // ini yang dikirim/ditampilkan ke orang tua
             $table->enum('status', ['pending', 'paid', 'expired', 'failed', 'cancelled'])->default('pending');
             $table->boolean('is_overpayment')->default(false);
+            // Nominal kelebihan bayar (untuk refund/pengalihan) — boolean saja tidak cukup.
+            $table->decimal('overpaid_amount', 12, 2)->default(0);
             $table->decimal('amount', 12, 2);
             $table->timestamp('expired_at')->nullable();
             $table->timestamp('paid_at')->nullable();

@@ -10,6 +10,10 @@
             <p class="text-sm text-slate-500">Tagihan bulanan siswa — SPP (generate massal) & tagihan lain (manual).</p>
         </div>
         <div class="flex gap-2">
+            <a href="{{ request()->boolean('kelebihan') ? route('finance.invoices.index') : route('finance.invoices.index', ['kelebihan' => 1]) }}"
+               class="inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium {{ request()->boolean('kelebihan') ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' }}">
+                <i class="ti ti-alert-triangle"></i> Kelebihan Bayar
+            </a>
             <a href="{{ route('finance.invoices.manual-create') }}"
                class="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
                 <i class="ti ti-plus"></i> Invoice Manual
@@ -57,6 +61,9 @@
                             @else
                                 <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">Dibatalkan</span>
                             @endif
+                            @if ($invoice->overpaid_total > 0)
+                                <span class="ml-1 inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">Lebih Rp{{ number_format($invoice->overpaid_total, 0, ',', '.') }}</span>
+                            @endif
                         </td>
                     </tr>
                 @empty
@@ -73,3 +80,4 @@
     </div>
 </div>
 @endsection
+
