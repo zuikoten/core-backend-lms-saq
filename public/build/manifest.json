@@ -14,10 +14,10 @@
     "src": "resources/js/app.js",
     "isEntry": true
   },
-  "resources/js/modules/academic/class-group-students.js": {
-    "file": "assets/class-group-students-BIGyGFnQ.js",
-    "name": "class-group-students",
-    "src": "resources/js/modules/academic/class-group-students.js",
+  "resources/js/modules/academic/class-group-students-index.js": {
+    "file": "assets/class-group-students-index-BIGyGFnQ.js",
+    "name": "class-group-students-index",
+    "src": "resources/js/modules/academic/class-group-students-index.js",
     "isEntry": true
   },
   "resources/js/modules/auth/otp-input.js": {
