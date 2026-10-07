@@ -24,6 +24,7 @@ Route::middleware(['auth:web', 'permission:academic.manage', EnsureUserIsActive:
     Route::prefix('class-group-students')->name('class-group-students.')->group(function () {
         Route::get('/', [ClassGroupStudentController::class, 'index'])->name('index');
         Route::post('/', [ClassGroupStudentController::class, 'store'])->name('store');
+        Route::post('bulk', [ClassGroupStudentController::class, 'bulk'])->name('bulk');
         Route::post('{classGroupStudent}/transfer', [ClassGroupStudentController::class, 'transfer'])->name('transfer');
     });
 
