@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-2xl" x-data="bulkInvoiceGeneration()">
     <h1 class="mb-2 text-xl font-semibold text-slate-800">Generate SPP Bulanan</h1>
-    <p class="mb-6 text-sm text-slate-500">Siswa yang muncul di bawah cuma yang punya tarif recurring & belum kena invoice periode ini.</p>
+    <p class="mb-6 text-sm text-slate-500">Yang muncul di bawah: siswa aktif yang punya tarif recurring (SPP, Tabungan Wajib) & belum kena invoice periode ini. Siswa aktif yang belum punya tarif ditampilkan sebagai peringatan.</p>
 
     <form action="{{ route('finance.invoices.bulk-store') }}" method="POST" class="rounded-2xl bg-white p-6 shadow-sm">
         @csrf
@@ -78,6 +78,14 @@
                 </div>
             </template>
         </div>
+
+        <template x-if="academicYearId && !loading && unmapped.length > 0">
+            <div class="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <p class="font-medium" x-text="unmapped.length + ' siswa aktif belum punya tarif SPP/tabungan, tidak akan ditagih periode ini:'"></p>
+                <p class="mt-1 text-xs" x-text="unmapped.map(student => student.full_name).join(', ')"></p>
+                <a href="{{ route('finance.student-tariff-mappings.index') }}" class="mt-2 inline-block text-xs font-medium text-amber-900 underline">Buka Pemetaan Tarif Siswa</a>
+            </div>
+        </template>
 
         <div class="flex gap-3">
             <button type="submit" :disabled="selectedIds.length === 0"

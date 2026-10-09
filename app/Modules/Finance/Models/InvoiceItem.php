@@ -10,8 +10,10 @@ class InvoiceItem extends Model
     protected $fillable = [
         'invoice_id',
         'billing_type_id',
+        'billing_tariff_id',
         'item_name',
         'amount',
+        'adjustment_note',
     ];
 
     protected function casts(): array
@@ -29,5 +31,10 @@ class InvoiceItem extends Model
     public function billingType(): BelongsTo
     {
         return $this->belongsTo(BillingType::class);
+    }
+
+    public function billingTariff(): BelongsTo
+    {
+        return $this->belongsTo(BillingTariff::class);
     }
 }

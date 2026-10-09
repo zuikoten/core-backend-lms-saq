@@ -11,6 +11,7 @@ class CreateManualInvoiceAction
 {
     public function __construct(
         private GenerateInvoiceNumberAction $generateInvoiceNumber,
+        private PrepareInvoiceItemAction $prepareInvoiceItem,
     ) {}
 
     /**
@@ -34,7 +35,12 @@ class CreateManualInvoiceAction
             ]);
         }
 
-        return DB::transaction(function () use ($data, $createdBy) {
+        // Semua item divalidasi/disiapkan DULU sebelum ada yang ditulis ke DB.
+        $items = collect($data['items'])
+            ->map(fn (array $item) => $this->prepareInvoiceItem->execute($item, (int) $data['academic_year_id']))
+            ->all();
+
+        return DB::transaction(function () use ($data, $createdBy, $items) {
             $student = Student::findOrFail($data['student_id']);
 
             $invoice = Invoice::create([
@@ -45,11 +51,11 @@ class CreateManualInvoiceAction
                 'period_month' => $data['period_month'],
                 'period_year' => $data['period_year'],
                 'due_date' => $data['due_date'] ?? null,
-                'total_amount' => collect($data['items'])->sum('amount'),
+                'total_amount' => collect($items)->sum('amount'),
                 'status' => 'unpaid',
             ]);
 
-            foreach ($data['items'] as $item) {
+            foreach ($items as $item) {
                 $invoice->items()->create($item);
             }
 

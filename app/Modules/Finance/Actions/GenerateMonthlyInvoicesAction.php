@@ -16,7 +16,12 @@ class GenerateMonthlyInvoicesAction
     /**
      * Tetap dicek ulang per siswa (bukan percaya hasil preview mentah-mentah)
      * untuk menghindari race condition — siswa yang ternyata sudah kena
-     * invoice di antara preview & submit cukup di-skip.
+     * invoice di antara preview & submit cukup di-skip. Status 'aktif' juga
+     * dicek ulang di sini, supaya ID siswa yang dipalsukan dari browser
+     * (mis. siswa lulus/mutasi) tidak ikut ditagih.
+     *
+     * Nama item memakai BillingTariff::itemLabel() (aturan yang sama dengan
+     * form manual) dan billing_tariff_id disimpan sebagai jejak tarif asal.
      *
      * @param  array<int>  $studentIds
      * @return array{created: int, skipped: int}
@@ -34,6 +39,8 @@ class GenerateMonthlyInvoicesAction
                 ->where('period_year', $periodYear)
                 ->exists();
 
+            $siswaAktif = Student::query()->whereKey($studentId)->where('status', 'aktif')->exists();
+
             $mappings = StudentTariffMapping::query()
                 ->with('billingTariff.billingType')
                 ->where('student_id', $studentId)
@@ -41,7 +48,7 @@ class GenerateMonthlyInvoicesAction
                 ->whereHas('billingTariff.billingType', fn ($query) => $query->where('is_recurring', true))
                 ->get();
 
-            if ($sudahAdaInvoice || $mappings->isEmpty()) {
+            if ($sudahAdaInvoice || ! $siswaAktif || $mappings->isEmpty()) {
                 $skipped++;
 
                 continue;
@@ -65,7 +72,8 @@ class GenerateMonthlyInvoicesAction
                 foreach ($mappings as $mapping) {
                     $invoice->items()->create([
                         'billing_type_id' => $mapping->billing_type_id,
-                        'item_name' => $mapping->billingTariff->billingType->name,
+                        'billing_tariff_id' => $mapping->billing_tariff_id,
+                        'item_name' => $mapping->billingTariff->itemLabel(),
                         'amount' => $mapping->billingTariff->amount,
                     ]);
                 }

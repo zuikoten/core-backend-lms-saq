@@ -15,8 +15,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('invoice_id')->constrained()->cascadeOnDelete();
             $table->foreignId('billing_type_id')->constrained()->restrictOnDelete();
+            // Tarif asal item. NULL = item bebas (diketik manual, tanpa tarif acuan).
+            // nullOnDelete: kalau tarif dihapus, item tetap utuh (nama & nominal adalah snapshot).
+            $table->foreignId('billing_tariff_id')->nullable()->constrained()->nullOnDelete();
             $table->string('item_name'); // snapshot nama saat invoice dibuat
             $table->decimal('amount', 12, 2);
+            // Alasan nominal berbeda dari tarif (diskon, kesepakatan khusus, dll).
+            // Terisi hanya kalau billing_tariff_id ada DAN amount != nominal tarif.
+            $table->string('adjustment_note')->nullable();
             $table->timestamps();
         });
     }

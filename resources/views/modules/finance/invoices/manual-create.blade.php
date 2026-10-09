@@ -3,7 +3,7 @@
 @section('title', 'Invoice Manual')
 
 @section('content')
-<div class="max-w-2xl" x-data="manualInvoiceForm(@js($billingTariffs->map(fn ($t) => ['id' => $t->id, 'billing_type_id' => $t->billing_type_id, 'label' => $t->billingType->name.' — '.$t->tariff_name, 'amount' => $t->amount])))">
+<div class="max-w-2xl" x-data="manualInvoiceForm(@js($billingTariffs->map(fn ($t) => ['id' => $t->id, 'billing_type_id' => $t->billing_type_id, 'label' => $t->itemLabel(), 'amount' => $t->amount])), @js($billingTypes->map(fn ($t) => ['id' => $t->id, 'name' => $t->name])), @js(old('items', [])))">
     <h1 class="mb-2 text-xl font-semibold text-slate-800">Invoice Manual</h1>
     <p class="mb-6 text-sm text-slate-500">Untuk tagihan sekali bayar di luar SPP (Uang Pangkal, dll). Kalau siswa sudah punya invoice bulan ini, tambahkan item lewat halaman invoice-nya, bukan di sini.</p>
 
@@ -57,22 +57,41 @@
             <p class="mb-3 text-sm font-medium text-slate-700">Item Tagihan</p>
 
             <template x-for="(item, index) in items" :key="index">
-                <div class="mb-3 grid grid-cols-12 gap-2">
-                    <select :name="`items[${index}][billing_tariff_ref]`" x-model="item.billing_tariff_id" @change="fillFromTariff(index)"
-                            class="col-span-4 rounded-xl border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-indigo-400">
+                <div class="mb-4 grid grid-cols-12 gap-2 rounded-xl border border-slate-100 p-3">
+                    <select :name="`items[${index}][billing_tariff_id]`" x-model="item.billing_tariff_id" @change="fillFromTariff(index)"
+                            class="col-span-6 rounded-xl border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-indigo-400">
                         <option value="">Pilih Tarif (opsional)</option>
                         <template x-for="tariff in billingTariffs" :key="tariff.id">
                             <option :value="tariff.id" x-text="tariff.label"></option>
                         </template>
                     </select>
-                    <input type="hidden" :name="`items[${index}][billing_type_id]`" x-model="item.billing_type_id">
-                    <input type="text" :name="`items[${index}][item_name]`" x-model="item.item_name" placeholder="Nama Item"
-                           class="col-span-4 rounded-xl border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-indigo-400">
-                    <input type="number" :name="`items[${index}][amount]`" x-model="item.amount" step="0.01" min="0" placeholder="Nominal"
-                           class="col-span-3 rounded-xl border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-indigo-400">
+
+                    {{-- Jenis tagihan: otomatis dari tarif; kalau tanpa tarif, wajib dipilih manual. --}}
+                    <select :name="`items[${index}][billing_type_id]`" x-model="item.billing_type_id" :disabled="!!item.billing_tariff_id"
+                            class="col-span-5 rounded-xl border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-indigo-400 disabled:bg-slate-50 disabled:text-slate-500">
+                        <option value="">Jenis Tagihan</option>
+                        <template x-for="type in billingTypes" :key="type.id">
+                            <option :value="type.id" x-text="type.name"></option>
+                        </template>
+                    </select>
+                    <input type="hidden" :name="`items[${index}][billing_type_id]`" :value="item.billing_type_id" :disabled="!item.billing_tariff_id">
+
                     <button type="button" @click="removeItem(index)" class="col-span-1 text-rose-500 hover:text-rose-700">
                         <i class="ti ti-trash"></i>
                     </button>
+
+                    <input type="text" :name="`items[${index}][item_name]`" x-model="item.item_name" placeholder="Nama Item"
+                           class="col-span-7 rounded-xl border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-indigo-400">
+                    <input type="number" :name="`items[${index}][amount]`" x-model="item.amount" step="0.01" min="0" placeholder="Nominal"
+                           class="col-span-5 rounded-xl border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-indigo-400">
+
+                    {{-- Muncul hanya kalau nominal diubah dari nominal tarif. --}}
+                    <div class="col-span-12" x-show="isAdjusted(index)" x-cloak>
+                        <input type="text" :name="`items[${index}][adjustment_note]`" x-model="item.adjustment_note" :disabled="!isAdjusted(index)"
+                               placeholder="Alasan nominal berbeda dari tarif (wajib)"
+                               class="w-full rounded-xl border-amber-300 bg-amber-50 px-3 py-2 text-sm focus:border-amber-400 focus:ring-amber-400">
+                        <p class="mt-1 text-xs text-amber-600" x-text="'Tarif standar ' + tariffAmountLabel(index) + ' — nominal diubah, isi alasannya.'"></p>
+                    </div>
                 </div>
             </template>
 

@@ -4,12 +4,14 @@ document.addEventListener('alpine:init', () => {
         periodMonth: new Date().getMonth() + 1,
         periodYear: new Date().getFullYear(),
         students: [],
+        unmapped: [], // siswa aktif yang belum punya tarif recurring (tidak ikut digenerate)
         selectedIds: [],
         loading: false,
 
         async fetchStudents() {
             this.selectedIds = [];
             this.students = [];
+            this.unmapped = [];
 
             if (!this.academicYearId || !this.periodMonth || !this.periodYear) return;
 
@@ -30,6 +32,7 @@ document.addEventListener('alpine:init', () => {
 
                 const data = await response.json();
                 this.students = data.students;
+                this.unmapped = data.unmapped ?? [];
                 this.selectedIds = this.students.map(student => student.id);
             } catch (error) {
                 alert('Gagal memuat daftar siswa. Coba lagi.');

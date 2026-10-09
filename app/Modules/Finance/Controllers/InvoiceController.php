@@ -102,7 +102,7 @@ class InvoiceController extends Controller
         );
 
         $pesan = "{$result['created']} invoice berhasil dibuat";
-        $pesan .= $result['skipped'] > 0 ? ", {$result['skipped']} dilewati (sudah ada invoice/tidak ada tarif)." : '.';
+        $pesan .= $result['skipped'] > 0 ? ", {$result['skipped']} dilewati (sudah ada invoice/tidak ada tarif/tidak aktif)." : '.';
 
         return redirect()->route('finance.invoices.index')->with('status', $pesan);
     }
@@ -112,8 +112,9 @@ class InvoiceController extends Controller
         $students = Student::query()->orderBy('full_name')->get();
         $academicYears = AcademicYear::query()->orderByDesc('year_name')->get();
         $billingTariffs = BillingTariff::query()->with('billingType')->get();
+        $billingTypes = BillingType::query()->orderBy('name')->get();
 
-        return view('modules.finance.invoices.manual-create', compact('students', 'academicYears', 'billingTariffs'));
+        return view('modules.finance.invoices.manual-create', compact('students', 'academicYears', 'billingTariffs', 'billingTypes'));
     }
 
     public function manualStore(StoreManualInvoiceRequest $request, CreateManualInvoiceAction $action): RedirectResponse

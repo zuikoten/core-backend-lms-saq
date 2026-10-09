@@ -85,7 +85,12 @@
             <tbody>
                 @foreach ($invoice->items as $item)
                     <tr class="border-b border-slate-50">
-                        <td class="py-3 text-slate-700">{{ $item->item_name }}</td>
+                        <td class="py-3 text-slate-700">
+                            {{ $item->item_name }}
+                            @if ($item->adjustment_note)
+                                <p class="text-xs text-amber-600">Disesuaikan dari tarif: {{ $item->adjustment_note }}</p>
+                            @endif
+                        </td>
                         <td class="py-3 text-right text-slate-700">Rp{{ number_format($item->amount, 0, ',', '.') }}</td>
                         @if ($invoice->status === 'unpaid')
                             <td class="py-3 text-right">

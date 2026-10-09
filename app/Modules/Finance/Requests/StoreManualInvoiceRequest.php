@@ -20,9 +20,11 @@ class StoreManualInvoiceRequest extends FormRequest
             'period_year' => ['required', 'integer', 'digits:4'],
             'due_date' => ['nullable', 'date'],
             'items' => ['required', 'array', 'min:1'],
+            'items.*.billing_tariff_id' => ['nullable', 'integer', 'exists:billing_tariffs,id'],
             'items.*.billing_type_id' => ['required', 'integer', 'exists:billing_types,id'],
             'items.*.item_name' => ['required', 'string', 'max:150'],
             'items.*.amount' => ['required', 'numeric', 'min:0'],
+            'items.*.adjustment_note' => ['nullable', 'string', 'max:255'],
         ];
     }
 }
